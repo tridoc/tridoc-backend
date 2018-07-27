@@ -1,0 +1,13 @@
+{
+  "name": "3doc",
+  "version": "0.0.1",
+  "description": "Simple RDF-Based Document Management System",
+  "main": "server.js",
+  "repository": "git@github.com:retog/3DOC.git",
+  "author": "Noam Bachmann <noam@factsmission.com>",
+  "license": "MIT",
+  "dependencies": {
+    "hapi": "^17.5.2",
+    "pdfjs-dist": "^2.0.489"
+  }
+}
