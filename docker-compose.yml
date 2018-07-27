@@ -1,0 +1,14 @@
+version: '3'
+services:
+  3doc:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - "fuseki"
+  fuseki:
+    image: "linkedsolutions/fuseki"
+    environment:
+      ADMIN_PASSWORD: "pw123"
+    ports:
+      - "8001:3030" # handy for development, remove in production
