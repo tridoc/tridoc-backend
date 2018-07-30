@@ -13,7 +13,7 @@ function storeDocument(id, text) {
             'INSERT DATA {\n' +
             '  GRAPH <http://3doc/meta> {\n' +
             '    <http://3doc/data/' + id + '> rdf:type s:DigitalDocument ;\n' +
-            '    s:dateCreated ' + now.toISOString() + ' ;\n' +
+            '    s:dateCreated "' + now.toISOString() + '" ;\n' +
             '    s:identifier "' + id + '" ;\n' +
             '    s:text "' + text + '" .\n' +
             '  }\n' +

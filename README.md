@@ -26,3 +26,27 @@ yarn start
 docker build -t 3doc .
 docker run -p 8000:8000 3doc
 ```
+
+# API
+
+| Address | Method | Description | Status |
+| - | - | - | - |
+| /doc | POST | Add Document | Implemented |
+| /doc | GET | Returns an array of objects with document identifiers and titles (if available) | Implemented |
+| /doc/{id} | GET | Get this document |
+| /doc/{id} | DELETE | Delete this document |
+| /doc/{id}/comment | POST | Add comment to document |
+| /doc/{id}/comment	| GET | Get comments |
+| /doc/{id}/tag | POST | Add a tag to document |
+| /doc/{id}/tag | GET | Get tags of document |
+| /doc/{id}/tag/{tagName} | DELETE | Remove tag from document |
+| /doc/{id}/title | PUT | Set document title. The entity body must be a JSON object like `{"title": "the_Title"}` | Implemented |
+| /doc/{id}/title | GET | Get document title. Returns a JSON object like `{"title": "the_Title"}` | Implemented |
+| /doc/{id}/title | DELETE | Reset document title |
+| /doc/{id}/meta | GET | Get title and tags |
+| /tag | POST | Create new tag |
+| /tag | GET | Get (list of) all tags |
+| /tag/{tagName} | GET | Get tag description |
+| /tag/{tagName} | DELETE | Delete this tag |
+
+Deleting / editing comments might be supportet in the future
