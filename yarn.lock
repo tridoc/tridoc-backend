@@ -184,6 +184,10 @@ mimos@4.x.x:
     hoek "5.x.x"
     mime-db "1.x.x"
 
+nanoid@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-1.1.0.tgz#b18e806e1cdbfdbe030374d5cf08a48cbc80b474"
+
 nigel@3.x.x:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/nigel/-/nigel-3.0.1.tgz#48a08859d65177312f1c25af7252c1e07bb07c2a"
@@ -195,11 +199,9 @@ node-ensure@^0.0.0:
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/node-ensure/-/node-ensure-0.0.0.tgz#ecae764150de99861ec5c810fd5d096b183932a7"
 
-pdf-parser@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/pdf-parser/-/pdf-parser-1.0.4.tgz#4bd10528897c7b7a4c3335bef5821cea4469fbe4"
-  dependencies:
-    node-ensure "^0.0.0"
+node-fetch@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.2.0.tgz#4ee79bde909262f9775f731e3656d0db55ced5b5"
 
 pdfjs-dist@^2.0.489:
   version "2.0.489"
