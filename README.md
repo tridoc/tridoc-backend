@@ -33,7 +33,7 @@ docker run -p 8000:8000 3doc
 | - | - | - | - |
 | /doc | POST | Add Document | Implemented |
 | /doc | GET | Returns an array of objects with document identifiers and titles (if available) | Implemented |
-| /doc/{id} | GET | Get this document |
+| /doc/{id} | GET | Get this document | Implemented |
 | /doc/{id} | DELETE | Delete this document |
 | /doc/{id}/comment | POST | Add comment to document |
 | /doc/{id}/comment	| GET | Get comments |
@@ -42,7 +42,7 @@ docker run -p 8000:8000 3doc
 | /doc/{id}/tag/{tagName} | DELETE | Remove tag from document |
 | /doc/{id}/title | PUT | Set document title. The entity body must be a JSON object like `{"title": "the_Title"}` | Implemented |
 | /doc/{id}/title | GET | Get document title. Returns a JSON object like `{"title": "the_Title"}` | Implemented |
-| /doc/{id}/title | DELETE | Reset document title |
+| /doc/{id}/title | DELETE | Reset document title | Implemented |
 | /doc/{id}/meta | GET | Get title and tags |
 | /tag | POST | Create new tag |
 | /tag | GET | Get (list of) all tags |

@@ -17,11 +17,11 @@ function getPath(id) {
     return "./blobs/"+id.slice(0,2)+"/"+id.slice(2,6)+"/"+id.slice(6,14)+"/"+id;;
 }
 
-function storeDocument(id, path) {
+function storeDocument(id,oldpath) {
     return new Promise((accept, reject) => {
         let newPath = getPath(id)
         mkdir(path.dirname(newPath));
-        fs.rename(path, newPath, (error, result) => {
+        fs.rename(oldpath, newPath, (error, result) => {
             if  (error) {
                 reject(error);
             } else {
@@ -44,3 +44,4 @@ function getDocument(id) {
 }
 
 exports.storeDocument = storeDocument;
+exports.getDocument = getDocument;

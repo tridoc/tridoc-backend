@@ -3,7 +3,9 @@
 const Hapi = require('hapi');
 const pdfProcessor = require('./src/pdfprocessor.js');
 const metaStorer = require('./src/metastorer.js');
+const dataStore = require('./src/datastore.js');
 const metaFinder = require('./src/metafinder.js');
+const metaDeleter = require('./src/metadeleter.js');
 var nanoid = require('nanoid');
 
 // Create a server with a host and port
@@ -17,12 +19,15 @@ server.route({
     config: {
         handler: (request, h) => {
             var id = nanoid();
-            console.log(request.payload);
             return pdfProcessor.getText(request.payload.path).then(text => {
-                console.log(id);
-                console.log(text);
+                console.log("Document created with id " + id);
                 return metaStorer.storeDocument(id,text).then(() => {
-                    return 'Recieved your data. Document-ID = ' + id;
+                    return dataStore.storeDocument(id,request.payload.path)
+                    .then(() => 
+                        h.response()
+                        .code(201)
+                        .header("location","/doc/" + id )
+                    );
                 });
             });
         },
@@ -40,6 +45,21 @@ server.route({
     path: '/doc',
     handler: function (request, h) {
         return metaFinder.getDocumentList();
+    }
+});
+
+server.route({
+    method: 'GET',
+    path: '/doc/{id}',
+    handler: function (request, h) {
+        var id = request.params.id;
+        return dataStore.getDocument(id).then(data => {
+            return metaFinder.getTitle(id).catch(e => "document").then(fileName => {
+                return h.response(data)
+                .header("content-disposition", "inline; filename=\"" + fileName + ".pdf\"")
+                .header("content-type", "application/pdf");
+            });
+        });
     }
 });
 
@@ -69,7 +89,10 @@ server.route({
     config: {
         handler: (request, h) => {
             var id = request.params.id;
-            return metaFinder.getTitle(id);
+            return metaFinder.getTitle(id).catch(e => 
+                h.response({"statusCode":404,"error":"(Title) Not Found","message":"Not Found"})
+                .code(404)
+            );
         }
     }
 });
@@ -80,7 +103,7 @@ server.route({
     config: {
         handler: (request, h) => {
             var id = request.params.id;
-            return metaFinder.getTitle(id);
+            return metaDeleter.deleteTitle(id);
         }
     }
 });
