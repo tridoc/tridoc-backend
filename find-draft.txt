@@ -1,0 +1,1 @@
+Encode where necessary: GET /find?tag=pay&tag=prority(>3)&tag=not(personal)&search=helsinki

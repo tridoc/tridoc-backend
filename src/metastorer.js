@@ -2,22 +2,24 @@ const fetch = require("node-fetch");
 
 function storeDocument(id, text) {
     var now = new Date();
+    let query = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n' +
+    'PREFIX s: <http://schema.org/>\n' +
+    'INSERT DATA {\n' +
+    '  GRAPH <http://3doc/meta> {\n' +
+    '    <http://3doc/data/' + id + '> rdf:type s:DigitalDocument ;\n' +
+    '    s:dateCreated "' + now.toISOString() + '" ;\n' +
+    '    s:identifier "' + id + '" ;\n' +
+    '    s:text "' + text.replace(/'/g,"\\'").replace(/"/g,"\\\"") + '" .\n' +
+    '  }\n' +
+    '}';
+    //console.log(query);
     return fetch("http://fuseki:3030/3DOC/update", {
         method: "POST",
         headers: {
             "Authorization": "Basic " + btoa("admin:pw123"),
             "Content-Type": "application/sparql-update"
         },
-        body: 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n' +
-            'PREFIX s: <http://schema.org/>\n' +
-            'INSERT DATA {\n' +
-            '  GRAPH <http://3doc/meta> {\n' +
-            '    <http://3doc/data/' + id + '> rdf:type s:DigitalDocument ;\n' +
-            '    s:dateCreated "' + now.toISOString() + '" ;\n' +
-            '    s:identifier "' + id + '" ;\n' +
-            '    s:text "' + text + '" .\n' +
-            '  }\n' +
-            '}'
+        body: query
     })
 }
 
