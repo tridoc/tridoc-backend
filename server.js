@@ -54,7 +54,7 @@ server.route({
     handler: function (request, h) {
         var id = request.params.id;
         return dataStore.getDocument(id).then(data => {
-            return metaFinder.getTitle(id).catch(e => "document").then(fileName => {
+            return metaFinder.getTitle(id).then(titleObject => titleObject.title).catch(e => "document").then(fileName => {
                 return h.response(data)
                 .header("content-disposition", "inline; filename=\"" + fileName + ".pdf\"")
                 .header("content-type", "application/pdf");
