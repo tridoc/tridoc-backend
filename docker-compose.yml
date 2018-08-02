@@ -12,3 +12,5 @@ services:
       ADMIN_PASSWORD: "pw123"
     ports:
       - "8001:3030" # handy for development, remove in production
+    volumes:
+      - ./config-tdb.ttl:/jena-fuseki/config-tdb
