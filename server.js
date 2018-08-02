@@ -47,7 +47,7 @@ server.route({
     method: 'GET',
     path: '/doc',
     handler: function (request, h) {
-        return metaFinder.getDocumentList();
+        return metaFinder.getDocumentList(request.query.text);
     }
 });
 
