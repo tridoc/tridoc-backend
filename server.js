@@ -12,7 +12,10 @@ var nanoid = require('nanoid');
 const server = Hapi.server({
     port: 8000,
     routes: {
-        cors: true
+        cors: {
+            additionalHeaders: ['Access-Control-Allow-Origin'],
+            origin: ['*']
+        }
     }
 });
 
