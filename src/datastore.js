@@ -21,7 +21,7 @@ function storeDocument(id,oldpath) {
     return new Promise((accept, reject) => {
         let newPath = getPath(id)
         mkdir(path.dirname(newPath));
-        fs.rename(oldpath, newPath, (error, result) => {
+        fs.copyFile(oldpath, newPath, (error, result) => {
             if  (error) {
                 reject(error);
             } else {

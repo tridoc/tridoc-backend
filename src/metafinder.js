@@ -11,11 +11,11 @@ function getDocumentList(textQuery) {
         body: 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n' +
             'PREFIX s: <http://schema.org/>\n' +
             'PREFIX text: <http://jena.apache.org/text#>\n' +
-            'SELECT ?s ?identifier ?title\n' +
+            'SELECT DISTINCT ?s ?identifier ?title\n' +
             'WHERE {\n' +
             '  ?s s:identifier ?identifier .\n' +
             '  OPTIONAL { ?s s:name ?title . }\n' +
-            (textQuery ? '?s text:query \"'+textQuery+'\" .\n':'')+
+            (textQuery ? '{ { ?s text:query  (s:name \"'+textQuery+'\") } UNION { ?s text:query  (s:text \"'+textQuery+'\")} } .\n':'')+
             '}'
     }).then((response) => response.json()).then((json) => 
         json.results.bindings.map((binding) => {

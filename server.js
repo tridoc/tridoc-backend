@@ -10,6 +10,7 @@ var nanoid = require('nanoid');
 
 // Create a server with a host and port
 const server = Hapi.server({
+    debug: { request: ['error'] },
     port: 8000,
     routes: {
         cors: {
