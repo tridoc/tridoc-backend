@@ -34,7 +34,7 @@ docker run -p 8000:8000 3doc
 | /doc | POST | Add Document | Implemented |
 | /doc | GET | Returns an array of objects with document identifiers and titles (if available) | Implemented |
 | /doc/{id} | GET | Get this document | Implemented |
-| /doc/{id} | DELETE | Delete this document |
+| /doc/{id} | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | Implemented |
 | /doc/{id}/comment | POST | Add comment to document |
 | /doc/{id}/comment	| GET | Get comments |
 | /doc/{id}/tag | POST | Add a tag to document |

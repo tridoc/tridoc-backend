@@ -71,6 +71,15 @@ server.route({
 });
 
 server.route({
+    method: 'DELETE',
+    path: '/doc/{id}',
+    handler: function (request, h) {
+        var id = request.params.id;
+        return metaDeleter.deleteFile(id);
+    }
+});
+
+server.route({
     method: 'PUT',
     path: '/doc/{id}/title',
     config: {
