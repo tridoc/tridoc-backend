@@ -7,7 +7,7 @@ docker-compose build
 docker-compose up
 ``` 
 
-## Alternative methods for setup
+## Alternative Methods for Setup
 
 The following methods expect an instance of Fuseki running on http://fuseki:3030/ with user `admin`  and password `pw123`. 
 
@@ -26,6 +26,9 @@ yarn start
 docker build -t 3doc .
 docker run -p 8000:8000 3doc
 ```
+# Tag System
+
+There are two types of tags: normal tags and parameterizable tags. Parameterizable tags need a parameter to become a parameterized tag wich can be added to a document.
 
 # API
 
@@ -44,8 +47,8 @@ docker run -p 8000:8000 3doc
 | /doc/{id}/title | GET | Get document title. Returns a JSON object like `{"title": "the_Title"}` | Implemented |
 | /doc/{id}/title | DELETE | Reset document title | Implemented |
 | /doc/{id}/meta | GET | Get title and tags |
-| /tag | POST | Create new tag |
-| /tag | GET | Get (list of) all tags |
+| /tag | POST | Create new tag | Partially Implemented |
+| /tag | GET | Get (list of) all tags | Implementet
 | /tag/{tagName} | GET | Get tag description |
 | /tag/{tagName} | DELETE | Delete this tag |
 

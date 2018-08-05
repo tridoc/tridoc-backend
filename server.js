@@ -92,7 +92,7 @@ server.route({
             });
         },
         payload: {
-            allow: ['application/json','text/*'],
+            allow: ['application/json'],
             maxBytes: 209715200,
             output: 'data',
             parse: true
@@ -121,6 +121,57 @@ server.route({
         handler: (request, h) => {
             var id = request.params.id;
             return metaDeleter.deleteTitle(id);
+        }
+    }
+});
+
+server.route({
+    method: 'POST',
+    path: '/tag',
+    config: {
+        handler: (request, h) => {
+            console.log(request.payload);
+            if (request.payload.parameterizable) {
+                return metaStorer.addTag(request.payload.label , request.payload.parameterizable.type).catch(e => {
+                    console.log(e);
+                    return e;
+                });
+            } else {
+                return metaStorer.addTag(request.payload.label).catch(e => {
+                    console.log(e);
+                    return e;
+                });
+            }
+        },
+        payload: {
+            allow: ['application/json'],
+            output: 'data',
+            parse: true
+        }
+    }
+});
+
+/*
+ADD TAG JSON SYNTAX
+--
+{
+    label : "tagname" ,
+    parameterizable : {
+        type : "http://www.w3.org/2001/XMLSchema#decimal" or "http://www.w3.org/2001/XMLSchema#date"
+    }
+}
+*/
+
+server.route({
+    method: 'GET',
+    path: '/tag',
+    config: {
+        handler: (request, h) => {
+            var id = request.params.id;
+            return metaFinder.getTagList().catch(e => 
+                h.response({"statusCode":404,"error":"(Title) Not Found","message":"Not Found"})
+                .code(404)
+            );
         }
     }
 });

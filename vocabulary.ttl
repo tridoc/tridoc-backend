@@ -1,24 +1,37 @@
-@prefix doc3:  <https://vocab.doc3.org/> .
+@prefix tridoc:  <https://vocab.tridoc.me/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 
-doc3:Tag a rdfs:Class .
-doc3:ParametizableTag a rdfs:Class ;
+tridoc:Tag a rdfs:Class .
+
+tridoc:ParameterizableTag a rdfs:Class ;
     rdfs:commment "this is something that requires a parameter value to become an actual tag" .
 
-doc3:label
+tridoc:ParameterizedTag a rdfs:Class ;
+    rdfs:subClassOf tridoc:Tag .
+
+tridoc:label
    rdf:type rdf:Property ;
    rdfs:domain [
-        owl:unionOf (doc3:ParametizableTag doc3:Tag)
+        owl:unionOf (tridoc:ParameterizableTag tridoc:Tag)
     ];
    rdfs:range xsd:String.
 
-doc3:value
+tridoc:tag
    rdf:type rdf:Property ;
-   rdfs:domain doc3:Tag .
+   rdfs:range tridoc:Tag .
 
-doc3:valueType
+tridoc:parameterizableTag
    rdf:type rdf:Property ;
-   rdfs:domain doc3:ParametizableTag .
+   rdfs:range tridoc:ParameterizableTag ;
+   rdfs:domain tridoc:ParameterizedTag .
+
+tridoc:value
+   rdf:type rdf:Property ;
+   rdfs:domain tridoc:ParameterizedTag .
+
+tridoc:valueType
+   rdf:type rdf:Property ;
+   rdfs:domain tridoc:ParameterizableTag .

@@ -29,6 +29,34 @@ function getDocumentList(textQuery) {
     );
 }
 
+function getTagList() {
+    var now = new Date();
+    return fetch("http://fuseki:3030/3DOC/query", {
+        method: "POST",
+        headers: {
+            "Authorization": "Basic " + btoa("admin:pw123"),
+            "Content-Type": "application/sparql-query"
+        },
+        body: 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n' +
+            'PREFIX s: <http://schema.org/>\n' +
+            'PREFIX tridoc:  <https://vocab.tridoc.me/>\n' +
+            'SELECT DISTINCT ?s ?label ?type\n' +
+            'WHERE {\n' +
+            '  ?s tridoc:label ?label .\n' +
+            '  OPTIONAL { ?s tridoc:valueType ?type . }\n' +
+            '}'
+    }).then((response) => response.json()).then((json) => 
+        json.results.bindings.map((binding) => {
+            let result = {};
+            result.label = binding.label.value;
+            if (binding.type) {
+                result.parameterizable = {type :binding.type.value};
+            }
+            return result;
+        })
+    );
+}
+
 function getTitle(id) {
     var now = new Date();
     return fetch("http://fuseki:3030/3DOC/query", {
@@ -50,4 +78,5 @@ function getTitle(id) {
 }
 
 exports.getDocumentList = getDocumentList;
+exports.getTagList = getTagList;
 exports.getTitle = getTitle;
