@@ -33,7 +33,8 @@ server.route({
                     .then(() => 
                         h.response()
                         .code(201)
-                        .header("location","/doc/" + id )
+                        .header("Location","/doc/" + id )
+                        .header("Access-Control-Expose-Headers", "Location")
                     );
                 });
             });
