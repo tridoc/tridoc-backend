@@ -131,17 +131,32 @@ server.route({
     config: {
         handler: (request, h) => {
             console.log(request.payload);
-            if (request.payload.parameterizable) {
-                return metaStorer.addTag(request.payload.label , request.payload.parameterizable.type).catch(e => {
-                    console.log(e);
-                    return e;
+            return metaFinder.getTagList().then(r => {
+                let exists = r.find(function (element) {
+                    return element.label == request.payload.label;
                 });
-            } else {
-                return metaStorer.addTag(request.payload.label).catch(e => {
-                    console.log(e);
-                    return e;
-                });
-            }
+                if (exists) {
+                    return h.response({
+                            "statusCode": 400,
+                            "error": "Tag exists already",
+                            "message": "Cannot create existing tag"
+                        })
+                        .code(400)
+                } else {
+                    if (request.payload.parameterizable) {
+                        return metaStorer.addTag(request.payload.label, request.payload.parameterizable.type).catch(e => {
+                            console.log(e);
+                            return e;
+                        });
+                    } else {
+                        return metaStorer.addTag(request.payload.label).catch(e => {
+                            console.log(e);
+                            return e;
+                        });
+                    }
+                }
+            });
+
         },
         payload: {
             allow: ['application/json'],
