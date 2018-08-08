@@ -34,7 +34,7 @@ function createTag(label, type) {
 }
 
 function addTag(id, label, value, type) {
-    let tag = value ? encodeURIComponent(label) + "/" + value : label ;
+    let tag = value ? encodeURIComponent(label) + "/" + value : encodeURIComponent(label) ;
     let query = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n' +
         'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n' +
         'PREFIX tridoc:  <http://vocab.tridoc.me/>\n' +
@@ -44,7 +44,7 @@ function addTag(id, label, value, type) {
         '    <http://3doc/data/' + id + '> tridoc:tag <http://3doc/tag/' + tag + '> .   \n' +
         (value ? '    <http://3doc/tag/' + tag + '> a tridoc:ParameterizedTag ;\n' +
         '      tridoc:parameterizableTag <http://3doc/tag/' + encodeURIComponent(label) + '>;\n' +
-        '      tridoc:value "' + value + '"^^' + type + ' .\n' : '') +
+        '      tridoc:value "' + value + '"^^<' + type + '> .\n' : '') +
         '  }\n' +
         '}';
     //console.log(query);

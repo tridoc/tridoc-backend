@@ -80,15 +80,54 @@ server.route({
     }
 });
 
-/*server.route({
+server.route({
     method: 'POST',
     path: '/doc/{id}/tag',
     config: {
         handler: (request, h) => {
             let id = request.params.id;
-            // label // value // type ?
+            let label = request.payload.label;
+            let value;
+            let type;
             console.log(request.payload);
-            return metaStorer.addTag(id, label, value, type).then(() => {
+            return metaFinder.getTagList().then(r => {
+                if (request.payload.parameterizable) {
+                    value = request.payload.parameterizable.value;
+                    type = request.payload.parameterizable.type;
+                }
+                let exists = r.find(function (element) {
+                    if (element.label == label) {
+                        return element;
+                    } else {
+                        return false;
+                    }
+                });
+                if (exists) {
+                    if (request.payload.parameterizable) {
+                        console.log(exists);
+                        if (exists.parameterizable.type == type) {
+                            console.log("Adding tag \"" +label+ "\" of type \""+type+"\" to " +id)
+                            return metaStorer.addTag(id, label, value, type)
+                        } else {
+                            return h.response({
+                                "statusCode": 400,
+                                "error": "Wrong type",
+                                "message": "Type provided does not match"
+                            })
+                            .code(400)
+                        }
+                    } else {
+                        console.log("Adding tag \"" +label+ "\" to " +id)
+                        return metaStorer.addTag(id, label);
+                    }
+                } else {
+                    return h.response({
+                            "statusCode": 400,
+                            "error": "Cannot find tag",
+                            "message": "Tag must exist before adding to a document"
+                        })
+                        .code(400)
+                }
             });
         },
         payload: {
@@ -98,7 +137,7 @@ server.route({
             parse: true
         }
     }
-});*/
+});
 
 server.route({
     method: 'PUT',
@@ -187,13 +226,22 @@ server.route({
 });
 
 /*
-ADD TAG JSON SYNTAX
+CREATE TAG JSON SYNTAX
 --
 {
     label : "tagname" ,
     parameterizable : {
         type : "http://www.w3.org/2001/XMLSchema#decimal" or "http://www.w3.org/2001/XMLSchema#date"
-    }
+    } // only for parameterizable tags
+}
+ADD TAG JSON SYNTAX
+--
+{
+    label : "tagname" ,
+    parameterizable : {
+        type : "http://www.w3.org/2001/XMLSchema#decimal" or "http://www.w3.org/2001/XMLSchema#date",
+        value : "20.7" or "2018-08-12" // must be valid xsd:decimal or xsd:date, as specified in property type.
+    } // only for parameterizable tags
 }
 */
 
@@ -215,7 +263,7 @@ server.route({
     path: '/tag/{label}',
     config: {
         handler: (request, h) => {
-            var label = request.params.label;
+            var label = decodeURIComponent(request.params.label);
             return metaDeleter.deleteTag(label);
         }
     }
