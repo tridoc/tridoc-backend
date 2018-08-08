@@ -30,12 +30,23 @@ docker run -p 8000:8000 3doc
 
 There are two types of tags: normal tags and parameterizable tags. Parameterizable tags need a parameter to become a parameterized tag wich can be added to a document.
 
-Tags can be added by POST to /tag. You neeed to send an JSON object like this:
+Tags can be added to a document by POST to /doc/{id}/tag. You neeed to send an JSON object like this:
 ```
 {
-    "label": "Betrag",
+    "label": "Amount",
     "parameterizable": {
-        "type":"http://www.w3.org/2001/XMLSchema#decimal"¨
+        "value":"12.50"
+    }
+}
+``` 
+
+
+Tags can be created by POST to /tag. You neeed to send an JSON object like this:
+```
+{
+    "label": "Amount",
+    "parameterizable": {
+        "type":"http://www.w3.org/2001/XMLSchema#decimal"
     }
 }
 ``` 
@@ -63,8 +74,8 @@ Tags can be added by POST to /tag. You neeed to send an JSON object like this:
 | /doc/{id}/title | DELETE | Reset document title | Implemented |
 | /doc/{id}/meta | GET | Get title and tags |
 | /tag | POST | Create new tag | Implemented |
-| /tag | GET | Get (list of) all tags | Implementet
-| /tag/{tagName} | GET | Get tag description |
-| /tag/{tagName} | DELETE | Delete this tag |
+| /tag | GET | Get (list of) all tags | Implementet |
+| /tag/{tagName} | GET | Get Documents with this tag |
+| /tag/{tagName} | DELETE | Delete this tag 
 
 Deleting / editing comments might be supportet in the future

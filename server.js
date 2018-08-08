@@ -80,6 +80,26 @@ server.route({
     }
 });
 
+/*server.route({
+    method: 'POST',
+    path: '/doc/{id}/tag',
+    config: {
+        handler: (request, h) => {
+            let id = request.params.id;
+            // label // value // type ?
+            console.log(request.payload);
+            return metaStorer.addTag(id, label, value, type).then(() => {
+            });
+        },
+        payload: {
+            allow: ['application/json'],
+            maxBytes: 209715200,
+            output: 'data',
+            parse: true
+        }
+    }
+});*/
+
 server.route({
     method: 'PUT',
     path: '/doc/{id}/title',
@@ -144,12 +164,12 @@ server.route({
                         .code(400)
                 } else {
                     if (request.payload.parameterizable) {
-                        return metaStorer.addTag(request.payload.label, request.payload.parameterizable.type).catch(e => {
+                        return metaStorer.createTag(request.payload.label, request.payload.parameterizable.type).catch(e => {
                             console.log(e);
                             return e;
                         });
                     } else {
-                        return metaStorer.addTag(request.payload.label).catch(e => {
+                        return metaStorer.createTag(request.payload.label).catch(e => {
                             console.log(e);
                             return e;
                         });
@@ -182,11 +202,21 @@ server.route({
     path: '/tag',
     config: {
         handler: (request, h) => {
-            var id = request.params.id;
             return metaFinder.getTagList().catch(e => 
                 h.response({"statusCode":404,"error":"(Title) Not Found","message":"Not Found"})
                 .code(404)
             );
+        }
+    }
+});
+
+server.route({
+    method: 'DELETE',
+    path: '/tag/{label}',
+    config: {
+        handler: (request, h) => {
+            var label = request.params.label;
+            return metaDeleter.deleteTag(label);
         }
     }
 });
