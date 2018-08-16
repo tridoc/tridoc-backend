@@ -68,7 +68,8 @@ function storeDocument(id, text) {
     '    <http://3doc/data/' + id + '> rdf:type s:DigitalDocument ;\n' +
     '    s:dateCreated "' + now.toISOString() + '"^^xsd:dateTime ;\n' +
     '    s:identifier "' + id + '" ;\n' +
-    '    s:text "' + text.replace(/'/g,"\\'").replace(/"/g,"\\\"") + '" .\n' +
+    '    s:text "' + 
+    text.replace(/\\/g,"\\\\'").replace(/\n/g,"\\n").replace(/\r/g,"\\r").replace(/'/g,"\\'").replace(/"/g,"\\\"") + '" .\n' +
     '  }\n' +
     '}';
     //console.log(query);
@@ -79,6 +80,13 @@ function storeDocument(id, text) {
             "Content-Type": "application/sparql-update"
         },
         body: query
+    }).then(response => {
+        //console.log("Fuseki returned: "+response.status);
+        if (response.ok) {
+            return response;
+        } else {
+            throw new Error(response.statusText);
+        }
     })
 }
 
