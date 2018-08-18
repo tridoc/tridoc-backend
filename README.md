@@ -67,7 +67,7 @@ Tags can be created by POST to /tag. You neeed to send an JSON object like this:
 | /doc/{id}/comment | POST | Add comment to document |
 | /doc/{id}/comment	| GET | Get comments |
 | /doc/{id}/tag | POST | Add a tag to document | Implemented |
-| /doc/{id}/tag | GET | Get tags of document |
+| /doc/{id}/tag | GET | Get tags of document | Implemented |
 | /doc/{id}/tag/{tagName} | DELETE | Remove tag from document |
 | /doc/{id}/title | PUT | Set document title. The entity body must be a JSON object like `{"title": "the_Title"}` | Implemented |
 | /doc/{id}/title | GET | Get document title. Returns a JSON object like `{"title": "the_Title"}` | Implemented |

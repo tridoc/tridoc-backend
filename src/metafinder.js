@@ -77,6 +77,51 @@ function getTitle(id) {
     );
 }
 
+function getTags(id) {
+    let query = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n' +
+    'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n' +
+    'PREFIX tridoc:  <http://vocab.tridoc.me/>\n' +
+    'PREFIX s: <http://schema.org/>\n' +
+    'SELECT DISTINCT ?label ?type ?v \n' +
+    ' WHERE { \n' +
+    '  GRAPH <http://3doc/meta> { \n' +
+    '    <http://3doc/data/' + id + '> tridoc:tag ?tag . \n' +
+    '    {\n' +
+    '      ?tag tridoc:label ?label . \n' +
+    '    } \n' +
+    '    UNION \n' +
+    '    { \n' +
+    '      ?tag tridoc:value ?v ; \n' +
+    '        tridoc:parameterizableTag ?ptag . \n' +
+    '      ?ptag tridoc:label ?label ; \n' +
+    '        tridoc:valueType ?type . \n' +
+    '    } \n' +
+    '  }\n' +
+    '}';
+    return fetch("http://fuseki:3030/3DOC/query", {
+        method: "POST",
+        headers: {
+            "Authorization": "Basic " + btoa("admin:pw123"),
+            "Content-Type": "application/sparql-query"
+        },
+        body: query
+    }).then((response) => response.json()).then((json) => 
+        json.results.bindings.map((binding) => {
+            let result = {};
+            result.label = binding.label.value;
+            if (binding.type) {
+                result.parameterizable = {
+                    "type": binding.type.value,
+                    "value": binding.v.value
+                };
+            }
+            return result;
+        })
+    );
+}
+
+
 exports.getDocumentList = getDocumentList;
 exports.getTagList = getTagList;
+exports.getTags = getTags;
 exports.getTitle = getTitle;

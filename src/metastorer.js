@@ -58,6 +58,7 @@ function addTag(id, label, value, type) {
     })
 }
 
+
 function storeDocument(id, text) {
     var now = new Date();
     let query = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n' +

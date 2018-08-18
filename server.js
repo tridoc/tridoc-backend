@@ -139,6 +139,19 @@ server.route({
 });
 
 server.route({
+    method: 'GET',
+    path: '/doc/{id}/tag',
+    config: {
+        handler: (request, h) => {
+            return metaFinder.getTags(request.params.id).catch(e => 
+                h.response({"statusCode":404,"error":"(Document) Not Found","message":"Not Found"})
+                .code(404)
+            );
+        }
+    }
+});
+
+server.route({
     method: 'PUT',
     path: '/doc/{id}/title',
     config: {
