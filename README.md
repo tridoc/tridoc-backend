@@ -66,7 +66,7 @@ Tags can be created by POST to /tag. You neeed to send an JSON object like this:
 | /doc/{id} | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | Implemented |
 | /doc/{id}/comment | POST | Add comment to document |
 | /doc/{id}/comment	| GET | Get comments |
-| /doc/{id}/tag | POST | Add a tag to document |
+| /doc/{id}/tag | POST | Add a tag to document | Implemented |
 | /doc/{id}/tag | GET | Get tags of document |
 | /doc/{id}/tag/{tagName} | DELETE | Remove tag from document |
 | /doc/{id}/title | PUT | Set document title. The entity body must be a JSON object like `{"title": "the_Title"}` | Implemented |
@@ -76,6 +76,6 @@ Tags can be created by POST to /tag. You neeed to send an JSON object like this:
 | /tag | POST | Create new tag | Implemented |
 | /tag | GET | Get (list of) all tags | Implementet |
 | /tag/{tagName} | GET | Get Documents with this tag |
-| /tag/{tagName} | DELETE | Delete this tag 
+| /tag/{tagName} | DELETE | Delete this tag | Implemented |
 
 Deleting / editing comments might be supportet in the future

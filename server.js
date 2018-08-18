@@ -95,29 +95,28 @@ server.route({
                     value = request.payload.parameterizable.value;
                     type = request.payload.parameterizable.type;
                 }
-                let exists = r.find(function (element) {
-                    if (element.label == label) {
-                        return element;
-                    } else {
-                        return false;
-                    }
-                });
+                let exists = r.find((element) => (element.label === label));
                 if (exists) {
                     if (request.payload.parameterizable) {
-                        console.log(exists);
-                        if (exists.parameterizable.type == type) {
-                            console.log("Adding tag \"" +label+ "\" of type \""+type+"\" to " +id)
+                        if (exists.parameterizable.type === type) {
+                            console.log("Adding tag \"" + label + "\" of type \"" + type + "\" to " + id)
                             return metaStorer.addTag(id, label, value, type)
                         } else {
                             return h.response({
                                 "statusCode": 400,
                                 "error": "Wrong type",
                                 "message": "Type provided does not match"
-                            })
-                            .code(400)
+                            }).code(400)
                         }
                     } else {
-                        console.log("Adding tag \"" +label+ "\" to " +id)
+                        if (exists.parameterizable) {
+                            return h.response({
+                                "statusCode": 400,
+                                "error": "Wrong type",
+                                "message": "You need to specify a value"
+                            }).code(400)
+                        }
+                        console.log("Adding tag \"" + label + "\" to " + id)
                         return metaStorer.addTag(id, label);
                     }
                 } else {
