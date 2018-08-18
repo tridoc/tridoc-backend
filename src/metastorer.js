@@ -19,7 +19,7 @@ function addTag(label, type) {
         '  GRAPH <http://3doc/meta> {\n' +
         '    <http://3doc/tag/' + encodeURIComponent(label) + '> rdf:type tridoc:' + tagType + ' ;\n' +
              valueType +
-        '    tridoc:label "' + label + '" .\n' +
+        '    tridoc:label "' + escapeLiteral(label) + '" .\n' +
         '  }\n' +
         '}';
     //console.log(query);
@@ -44,7 +44,7 @@ function storeDocument(id, text) {
     '    s:dateCreated "' + now.toISOString() + '"^^xsd:dateTime ;\n' +
     '    s:identifier "' + id + '" ;\n' +
     '    s:text "' + 
-    text.replace(/\\/g,"\\\\'").replace(/\n/g,"\\n").replace(/\r/g,"\\r").replace(/'/g,"\\'").replace(/"/g,"\\\"") + '" .\n' +
+    escapeLiteral(text) + '" .\n' +
     '  }\n' +
     '}';
     //console.log(query);
@@ -65,6 +65,10 @@ function storeDocument(id, text) {
     })
 }
 
+function escapeLiteral(string) {
+    return string.replace(/\\/g,"\\\\'").replace(/\n/g,"\\n").replace(/\r/g,"\\r").replace(/'/g,"\\'").replace(/"/g,"\\\"");
+}
+
 function setTitle(id, title) {
     var now = new Date();
     return fetch("http://fuseki:3030/3DOC/update", {
@@ -77,8 +81,14 @@ function setTitle(id, title) {
             'PREFIX s: <http://schema.org/>\n' +
             'WITH <http://3doc/meta>\n' +
             'DELETE { <http://3doc/data/' + id + '> s:name ?o }\n' +
-            'INSERT { <http://3doc/data/' + id + '> s:name "' + title + '" }\n' +
+            'INSERT { <http://3doc/data/' + id + '> s:name "' + escapeLiteral(title) + '" }\n' +
             'WHERE { OPTIONAL { <http://3doc/data/' + id + '> s:name ?o } }'
+    }).then(response => {
+        if (response.ok) {
+            return response;
+        } else {
+            throw new Error(response.statusText);
+        }
     })
 }
 
