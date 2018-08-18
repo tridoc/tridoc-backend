@@ -30,6 +30,32 @@ docker run -p 8000:8000 3doc
 
 There are two types of tags: normal tags and parameterizable tags. Parameterizable tags need a parameter to become a parameterized tag wich can be added to a document.
 
+Tags can be added to a document by POST to /doc/{id}/tag. You neeed to send an JSON object like this:
+```
+{
+    "label": "Amount",
+    "parameterizable": {
+        "value":"12.50"
+    }
+}
+``` 
+
+
+Tags can be created by POST to /tag. You neeed to send an JSON object like this:
+```
+{
+    "label": "Amount",
+    "parameterizable": {
+        "type":"http://www.w3.org/2001/XMLSchema#decimal"
+    }
+}
+``` 
+| Property | Requiredness | Note |
+| - | - | - |
+| label | required | Must be unique |
+| parameterizable | required for parameterizable tags, forbidden for normal tags | Object containg the type |
+| parameterizable.type | required for parameterizable tags | can either be http://www.w3.org/2001/XMLSchema#decimal or http://www.w3.org/2001/XMLSchema#date |
+
 # API
 
 | Address | Method | Description | Status |
@@ -47,9 +73,9 @@ There are two types of tags: normal tags and parameterizable tags. Parameterizab
 | /doc/{id}/title | GET | Get document title. Returns a JSON object like `{"title": "the_Title"}` | Implemented |
 | /doc/{id}/title | DELETE | Reset document title | Implemented |
 | /doc/{id}/meta | GET | Get title and tags |
-| /tag | POST | Create new tag | Partially Implemented |
-| /tag | GET | Get (list of) all tags | Implementet
-| /tag/{tagName} | GET | Get tag description |
-| /tag/{tagName} | DELETE | Delete this tag |
+| /tag | POST | Create new tag | Implemented |
+| /tag | GET | Get (list of) all tags | Implementet |
+| /tag/{tagName} | GET | Get Documents with this tag |
+| /tag/{tagName} | DELETE | Delete this tag 
 
 Deleting / editing comments might be supportet in the future

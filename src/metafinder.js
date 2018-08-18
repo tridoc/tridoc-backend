@@ -39,7 +39,7 @@ function getTagList() {
         },
         body: 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n' +
             'PREFIX s: <http://schema.org/>\n' +
-            'PREFIX tridoc:  <https://vocab.tridoc.me/>\n' +
+            'PREFIX tridoc:  <http://vocab.tridoc.me/>\n' +
             'SELECT DISTINCT ?s ?label ?type\n' +
             'WHERE {\n' +
             '  ?s tridoc:label ?label .\n' +
