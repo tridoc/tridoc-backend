@@ -1,6 +1,9 @@
 const fetch = require("node-fetch");
 
 function createTag(label, type) {
+    if (label.length < 1) {
+        return Promise.reject("Invalid name.")
+    }
     let tagType = "Tag";
     let valueType = "";
     if (type) {
