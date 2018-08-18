@@ -34,7 +34,8 @@ Tags can be added to a document by POST to /doc/{id}/tag. You neeed to send an J
 ```
 {
     "label": "Amount",
-    "parameterizable": {
+    "parameter": {
+        "type":"http://www.w3.org/2001/XMLSchema#decimal"
         "value":"12.50"
     }
 }
@@ -45,7 +46,7 @@ Tags can be created by POST to /tag. You neeed to send an JSON object like this:
 ```
 {
     "label": "Amount",
-    "parameterizable": {
+    "parameter": {
         "type":"http://www.w3.org/2001/XMLSchema#decimal"
     }
 }
@@ -53,8 +54,8 @@ Tags can be created by POST to /tag. You neeed to send an JSON object like this:
 | Property | Requiredness | Note |
 | - | - | - |
 | label | required | Must be unique |
-| parameterizable | required for parameterizable tags, forbidden for normal tags | Object containg the type |
-| parameterizable.type | required for parameterizable tags | can either be http://www.w3.org/2001/XMLSchema#decimal or http://www.w3.org/2001/XMLSchema#date |
+| parameter | required for parameterizable tags, forbidden for normal tags | Object containg the type |
+| parameter.type | required for parameterizable tags | can either be http://www.w3.org/2001/XMLSchema#decimal or http://www.w3.org/2001/XMLSchema#date |
 
 # API
 

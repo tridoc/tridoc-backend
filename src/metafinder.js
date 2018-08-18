@@ -50,7 +50,7 @@ function getTagList() {
             let result = {};
             result.label = binding.label.value;
             if (binding.type) {
-                result.parameterizable = {type :binding.type.value};
+                result.parameter = {type :binding.type.value};
             }
             return result;
         })
@@ -110,7 +110,7 @@ function getTags(id) {
             let result = {};
             result.label = binding.label.value;
             if (binding.type) {
-                result.parameterizable = {
+                result.parameter = {
                     "type": binding.type.value,
                     "value": binding.v.value
                 };

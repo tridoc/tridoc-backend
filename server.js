@@ -91,14 +91,14 @@ server.route({
             let type;
             console.log(request.payload);
             return metaFinder.getTagList().then(r => {
-                if (request.payload.parameterizable) {
-                    value = request.payload.parameterizable.value;
-                    type = request.payload.parameterizable.type;
+                if (request.payload.parameter) {
+                    value = request.payload.parameter.value;
+                    type = request.payload.parameter.type;
                 }
                 let exists = r.find((element) => (element.label === label));
                 if (exists) {
-                    if (request.payload.parameterizable) {
-                        if (exists.parameterizable.type === type) {
+                    if (request.payload.parameter) {
+                        if (exists.parameter.type === type) {
                             console.log("Adding tag \"" + label + "\" of type \"" + type + "\" to " + id)
                             return metaStorer.addTag(id, label, value, type)
                         } else {
@@ -109,7 +109,7 @@ server.route({
                             }).code(400)
                         }
                     } else {
-                        if (exists.parameterizable) {
+                        if (exists.parameter) {
                             return h.response({
                                 "statusCode": 400,
                                 "error": "Wrong type",
@@ -214,8 +214,8 @@ server.route({
                         })
                         .code(400)
                 } else {
-                    if (request.payload.parameterizable) {
-                        return metaStorer.createTag(request.payload.label, request.payload.parameterizable.type).catch(e => {
+                    if (request.payload.parameter) {
+                        return metaStorer.createTag(request.payload.label, request.payload.parameter.type).catch(e => {
                             console.log(e);
                             return e;
                         });
@@ -242,7 +242,7 @@ CREATE TAG JSON SYNTAX
 --
 {
     label : "tagname" ,
-    parameterizable : {
+    parameter : {
         type : "http://www.w3.org/2001/XMLSchema#decimal" or "http://www.w3.org/2001/XMLSchema#date"
     } // only for parameterizable tags
 }
@@ -250,7 +250,7 @@ ADD TAG JSON SYNTAX
 --
 {
     label : "tagname" ,
-    parameterizable : {
+    parameter : {
         type : "http://www.w3.org/2001/XMLSchema#decimal" or "http://www.w3.org/2001/XMLSchema#date",
         value : "20.7" or "2018-08-12" // must be valid xsd:decimal or xsd:date, as specified in property type.
     } // only for parameterizable tags
