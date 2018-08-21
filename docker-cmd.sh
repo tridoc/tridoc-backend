@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 sleep 5
 echo 'Attempting to create Dataset "3DOC"'
 curl 'http://fuseki:3030/$/datasets' -H "Authorization: Basic $(echo -n admin:pw123 | base64)" \

@@ -1,5 +1,6 @@
 FROM node:8.11-alpine
 EXPOSE 8000
+RUN apk add --no-cache curl bash
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 COPY . /usr/src/app
