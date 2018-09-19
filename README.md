@@ -61,8 +61,9 @@ Tags can be created by POST to /tag. You neeed to send an JSON object like this:
 
 | Address | Method | Description | Status |
 | - | - | - | - |
+| /count| GET | Returns number of documents * | Implemented |
 | /doc | POST | Add Document | Implemented |
-| /doc | GET | Returns an array of objects with document identifiers and titles (if available) | Implemented |
+| /doc | GET | Returns an array of objects with document identifiers and titles (if available) * **| Implemented |
 | /doc/{id} | GET | Get this document | Implemented |
 | /doc/{id} | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | Implemented |
 | /doc/{id}/comment | POST | Add comment to document |
@@ -78,5 +79,8 @@ Tags can be created by POST to /tag. You neeed to send an JSON object like this:
 | /tag | GET | Get (list of) all tags | Implementet |
 | /tag/{tagName} | GET | Get Documents with this tag |
 | /tag/{tagName} | DELETE | Delete this tag | Implemented |
+
+\* Supports ?query
+** Supports ?limit and ?offset
 
 Deleting / editing comments might be supportet in the future
