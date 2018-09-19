@@ -80,7 +80,7 @@ Tags can be created by POST to /tag. You neeed to send an JSON object like this:
 | /tag/{tagName} | GET | Get Documents with this tag |
 | /tag/{tagName} | DELETE | Delete this tag | Implemented |
 
-\* Supports ?query
+\* Supports ?text
 ** Supports ?limit and ?offset
 
 Deleting / editing comments might be supportet in the future
