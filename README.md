@@ -1,4 +1,4 @@
-# 3DOC
+# tridoc
 
 ## Setup with Docker-compose 
 
@@ -11,6 +11,13 @@ docker-compose up
 
 The following methods expect an instance of Fuseki running on http://fuseki:3030/ with user `admin`  and password `pw123`. 
 
+### Docker 
+
+```
+docker build -t 3doc .
+docker run -p 8000:8000 3doc
+```
+
 ### Yarn
 This method also expects that there is a database called `3doc` on the fuseki instance.
 
@@ -20,67 +27,81 @@ yarn install
 yarn start
 ```
 
-### Docker 
-
-```
-docker build -t 3doc .
-docker run -p 8000:8000 3doc
-```
 # Tag System
 
-There are two types of tags: normal tags and parameterizable tags. Parameterizable tags need a parameter to become a parameterized tag wich can be added to a document.
+There are two types of tags: simple tags and parameterizable tags. Parameterizable tags need a parameter to become a parameterized tag wich can be added to a document.
 
-Tags can be added to a document by POST to /doc/{id}/tag. You neeed to send an JSON object like this:
+## Simple Tags
+
+Simple tags can be created by `POST` to `/tag`. You need to send an JSON object like this:
+
+```json
+{"label": "Inbox"}
 ```
+
+> Note: `label` must be unique.
+
+Tags can be added to a document by `POST` to `/doc/{id}/tag`. You need to send an JSON object like the one above.
+
+> Tags must be created before adding them to a document.
+
+## Parameterizable & Parameterized Tags
+
+Parameterizable tags can be created by `POST` to `/tag` too. You need to send an JSON object like this:
+
+```json
 {
     "label": "Amount",
     "parameter": {
         "type":"http://www.w3.org/2001/XMLSchema#decimal"
+    }
+}
+``` 
+
+> Again, `label` must be unique. \
+> `parameter.type` can either be http://www.w3.org/2001/XMLSchema#decimal or http://www.w3.org/2001/XMLSchema#date .
+
+Parameterizable tags can only be added to a document with a value assigned. By `POST`ing a JSON object like the following to `/doc/{id}/tag`, a parameterized tag is created and added to the document.
+
+```json
+{
+    "label": "Amount",
+    "parameter": {
+        "type":"http://www.w3.org/2001/XMLSchema#decimal",
         "value":"12.50"
     }
 }
 ``` 
 
-
-Tags can be created by POST to /tag. You neeed to send an JSON object like this:
-```
-{
-    "label": "Amount",
-    "parameter": {
-        "type":"http://www.w3.org/2001/XMLSchema#decimal"
-    }
-}
-``` 
-| Property | Requiredness | Note |
-| - | - | - |
-| label | required | Must be unique |
-| parameter | required for parameterizable tags, forbidden for normal tags | Object containg the type |
-| parameter.type | required for parameterizable tags | can either be http://www.w3.org/2001/XMLSchema#decimal or http://www.w3.org/2001/XMLSchema#date |
+> A parameterizable tag with this `label` and `parameter.type` has to be created before.
 
 # API
 
-| Address | Method | Description | Status |
-| - | - | - | - |
-| /count| GET | Returns number of documents * | Implemented |
-| /doc | POST | Add Document | Implemented |
-| /doc | GET | Returns an array of objects with document identifiers and titles (if available) * **| Implemented |
-| /doc/{id} | GET | Get this document | Implemented |
-| /doc/{id} | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | Implemented |
-| /doc/{id}/comment | POST | Add comment to document |
-| /doc/{id}/comment	| GET | Get comments |
-| /doc/{id}/tag | POST | Add a tag to document | Implemented |
-| /doc/{id}/tag | GET | Get tags of document | Implemented |
-| /doc/{id}/tag/{tagName} | DELETE | Remove tag from document |
-| /doc/{id}/title | PUT | Set document title. The entity body must be a JSON object like `{"title": "the_Title"}` | Implemented |
-| /doc/{id}/title | GET | Get document title. Returns a JSON object like `{"title": "the_Title"}` | Implemented |
-| /doc/{id}/title | DELETE | Reset document title | Implemented |
-| /doc/{id}/meta | GET | Get title and tags |
-| /tag | POST | Create new tag | Implemented |
-| /tag | GET | Get (list of) all tags | Implementet |
-| /tag/{tagName} | GET | Get Documents with this tag |
-| /tag/{tagName} | DELETE | Delete this tag | Implemented |
+| Address | Method | Description | Request / Payload  | Response| Status |
+| - | - | - | - | - | - |
+| /count | GET | Count (matching) documents | * | Number | Implemented |
+| /doc | POST | Add / Store Document | PDF | - | Implemented |
+| /doc | GET | Get List of all (matching) documents | * ** *** | Array of objects with document identifiers and titles (where available) | Implemented |
+| /doc/{id} | GET | Get this document | - | PDF | Implemented |
+| /doc/{id} | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | - | - | Implemented |
+| /doc/{id}/comment | POST | Add comment to document | - | - | - |
+| /doc/{id}/comment	| GET | Get comments | - | - | - |
+| /doc/{id}/tag | POST | Add a tag to document | See above | - | Implemented |
+| /doc/{id}/tag | GET | Get tags of document | - | See above | Implemented |
+| /doc/{id}/tag/{tagName} | DELETE | Remove tag from document | - | - | - |
+| /doc/{id}/title | PUT | Set document title | `{"title": "the_Title"}` | - | Implemented |
+| /doc/{id}/title | GET | Get document title | - | `{"title": "the_Title"}` | Implemented |
+| /doc/{id}/title | DELETE | Reset document title | - | - | Implemented |
+| /doc/{id}/meta | GET | Get title and tags | - | - | - |
+| /tag | POST | Create new tag | See above | - | Implemented |
+| /tag | GET | Get (list of) all tags | - | - | Implemented |
+| /tag/{tagName} | GET | Get Documents with this tag | - | - | try `/doc?tag={tagName}` |
+| /tag/{tagName} | DELETE | Delete this tag | - | - | Implemented |
 
-\* Supports ?text
-** Supports ?limit and ?offset
+#### URL-Paramters supported:
 
-Deleting / editing comments might be supportet in the future
+\* ?text \
+** ?limit and ?offset \
+*** ?tag
+
+> Deleting / editing comments might be supportet in the future
