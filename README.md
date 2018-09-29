@@ -77,31 +77,31 @@ Parameterizable tags can only be added to a document with a value assigned. By `
 
 # API
 
-| Address | Method | Description | Request / Payload  | Response| Status |
-| - | - | - | - | - | - |
-| /count | GET | Count (matching) documents | * | Number | Implemented |
-| /doc | POST | Add / Store Document | PDF | - | Implemented |
-| /doc | GET | Get List of all (matching) documents | * ** *** | Array of objects with document identifiers and titles (where available) | Implemented |
-| /doc/{id} | GET | Get this document | - | PDF | Implemented |
-| /doc/{id} | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | - | - | Implemented |
-| /doc/{id}/comment | POST | Add comment to document | - | - | - |
-| /doc/{id}/comment	| GET | Get comments | - | - | - |
-| /doc/{id}/tag | POST | Add a tag to document | See above | - | Implemented |
-| /doc/{id}/tag | GET | Get tags of document | - | See above | Implemented |
-| /doc/{id}/tag/{tagName} | DELETE | Remove tag from document | - | - | - |
-| /doc/{id}/title | PUT | Set document title | `{"title": "the_Title"}` | - | Implemented |
-| /doc/{id}/title | GET | Get document title | - | `{"title": "the_Title"}` | Implemented |
-| /doc/{id}/title | DELETE | Reset document title | - | - | Implemented |
-| /doc/{id}/meta | GET | Get title and tags | - | - | - |
-| /tag | POST | Create new tag | See above | - | Implemented |
-| /tag | GET | Get (list of) all tags | - | - | Implemented |
-| /tag/{tagName} | GET | Get Documents with this tag | - | - | try `/doc?tag={tagName}` |
-| /tag/{tagName} | DELETE | Delete this tag | - | - | Implemented |
+| Address                    | Method | Description                 | Request / Payload  | Response| Status |
+| -                          | -      | -                           | - | - | - |
+| `/count`                   | GET    | Count (matching) documents  | <sup>[1](#f1)</sup> <sup>[3](#f3)</sup> | Number | Implemented |
+| `/doc`                     | POST   | Add / Store Document        | PDF | - | Implemented |
+| `/doc`                     | GET    | Get List of all (matching) documents | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> <sup>[3](#f3)</sup> | Array of objects with document identifiers and titles (where available) | Implemented |
+| `/doc/{id}`                | GET    | Get this document           | - | PDF | Implemented |
+| `/doc/{id}`                | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | - | - | Implemented |
+| `/doc/{id}/comment`        | POST   | Add comment to document     | - | - | - |
+| `/doc/{id}/comment`        | GET    | Get comments                | - | - | - |
+| `/doc/{id}/tag`            | POST   | Add a tag to document       | Tag object / See above | - | Implemented |
+| `/doc/{id}/tag`            | GET    | Get tags of document        | - | Array of tag objects | Implemented |
+| `/doc/{id}/tag/{tagLabel}` | DELETE | Remove tag from document    | - | - | - |
+| `/doc/{id}/title`          | PUT    | Set document title          | `{"title": "the_Title"}` | - | Implemented |
+| `/doc/{id}/title`          | GET    | Get document title          | - | `{"title": "the_Title"}` | Implemented |
+| `/doc/{id}/title`          | DELETE | Reset document title        | - | - | Implemented |
+| `/doc/{id}/meta`           | GET    | Get title and tags          | - | - | - |
+| `/tag`                     | POST   | Create new tag              | See above | - | Implemented |
+| `/tag`                     | GET    | Get (list of) all tags      | - | - | Implemented |
+| `/tag/{tagLabel}`          | GET    | Get Documents with this tag | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> | Array of objects with document identifiers and titles (where available) |  Implemented, same as `/doc?tag={tagLabel}` |
+| `/tag/{tagLabel}`          | DELETE | Delete this tag             | - | - | Implemented |
 
 #### URL-Paramters supported:
 
-\* ?text \
-** ?limit and ?offset \
-*** ?tag
+<sup id="f1">[1](#f1)</sup> : ?text \
+<sup id="f2">[2](#f2)</sup> : ?limit and ?offset \
+<sup id="f3">[3](#f3)</sup> : ?tag
 
 > Deleting / editing comments might be supportet in the future
