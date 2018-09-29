@@ -88,7 +88,7 @@ Parameterizable tags can only be added to a document with a value assigned. By `
 | `/doc/{id}/comment`        | GET    | Get comments                | - | - | - |
 | `/doc/{id}/tag`            | POST   | Add a tag to document       | Tag object / See above | - | Implemented |
 | `/doc/{id}/tag`            | GET    | Get tags of document        | - | Array of tag objects | Implemented |
-| `/doc/{id}/tag/{tagLabel}` | DELETE | Remove tag from document    | - | - | - |
+| `/doc/{id}/tag/{tagLabel}` | DELETE | Remove tag from document    | - | - | Implemented |
 | `/doc/{id}/title`          | PUT    | Set document title          | `{"title": "the_Title"}` | - | Implemented |
 | `/doc/{id}/title`          | GET    | Get document title          | - | `{"title": "the_Title"}` | Implemented |
 | `/doc/{id}/title`          | DELETE | Reset document title        | - | - | Implemented |
