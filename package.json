@@ -8,6 +8,7 @@
   "license": "MIT",
   "dependencies": {
     "hapi": "^17.5.2",
+    "hapi-auth-basic": "^5.0.0",
     "nanoid": "^1.1.0",
     "node-fetch": "^2.2.0",
     "pdfjs-dist": "^2.0.489"

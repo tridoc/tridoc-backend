@@ -101,6 +101,14 @@ fast-json-stable-stringify@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/fast-json-stable-stringify/-/fast-json-stable-stringify-2.0.0.tgz#d5142c0caee6b1189f87d3a76111064f86c8bbf2"
 
+hapi-auth-basic@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/hapi-auth-basic/-/hapi-auth-basic-5.0.0.tgz#0438b00225e4f7baccd7f29e04b4fc5037c012b0"
+  integrity sha1-BDiwAiXk97rM1/KeBLT8UDfAErA=
+  dependencies:
+    boom "7.x.x"
+    hoek "5.x.x"
+
 hapi@^17.5.2:
   version "17.5.2"
   resolved "https://registry.yarnpkg.com/hapi/-/hapi-17.5.2.tgz#9c5823cdcdd17e5621ebc8928aefb144d033caac"

@@ -1,6 +1,6 @@
 version: '3'
 services:
-  3doc:
+  tridoc:
     build: .
     ports:
       - "8000:8000"
@@ -8,6 +8,8 @@ services:
       - "fuseki"
     volumes:
       - ./blobs:/usr/src/app/blobs
+    environment:
+      TRIDOC_PWD: "${TRIDOC_PWD}"
   fuseki:
     image: "linkedsolutions/fuseki"
     environment:

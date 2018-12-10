@@ -1,5 +1,16 @@
 # tridoc
 
+With all the different startup methods you need to set the environment varaiable TRIDOC_PWD to set the password of
+the tridoc user.
+
+On Unix you can do this with
+
+export TRIDOC_PWD = "YOUR PASSWORD HERE"
+
+on windows
+
+$env:TRIDOC_PWD = "YOUR PASSWORD HERE"
+
 ## Setup with Docker-compose 
 
 ```
@@ -14,8 +25,8 @@ The following methods expect an instance of Fuseki running on http://fuseki:3030
 ### Docker 
 
 ```
-docker build -t 3doc .
-docker run -p 8000:8000 3doc
+docker build -t tridoc .
+docker run -p 8000:8000 tridoc
 ```
 
 ### Yarn
