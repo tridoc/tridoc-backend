@@ -26,7 +26,7 @@ The following methods expect an instance of Fuseki running on http://fuseki:3030
 
 ```
 docker build -t tridoc .
-docker run -p 8000:8000 tridoc
+docker run -p 8000:8000 -e TRIDOC_PWD="YOUR PASSWORD HERE" tridoc
 ```
 
 ### Yarn
