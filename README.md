@@ -1,7 +1,7 @@
 # tridoc
 
-With all the different startup methods you need to set the environment varaiable TRIDOC_PWD to set the password of
-the tridoc user.
+With all the different startup methods you need to set the environment variable TRIDOC_PWD to set the password of
+the tridoc user (usernmae is currently fixed to 'tridoc').
 
 On Unix you can do this with
 
