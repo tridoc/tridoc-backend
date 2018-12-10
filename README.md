@@ -1,35 +1,41 @@
 # tridoc
 
-With all the different startup methods you need to set the environment variable TRIDOC_PWD to set the password of
-the tridoc user (usernmae is currently fixed to 'tridoc').
+Server-side infrastructure for tridoc: easy document management for individuals and small teams.
 
-On Unix you can do this with
+## Setup
 
+You need to set the environment variable TRIDOC_PWD to set the password of
+the tridoc user (the username is currently fixed to 'tridoc'.
+
+On Unix / Linux:
+```
 export TRIDOC_PWD = "YOUR PASSWORD HERE"
+```
 
-on windows
-
+On Windows:
+```
 $env:TRIDOC_PWD = "YOUR PASSWORD HERE"
+```
 
-## Setup with Docker-compose 
+### Setup with Docker-compose 
 
 ```
 docker-compose build
 docker-compose up
 ``` 
 
-## Alternative Methods for Setup
+### Alternative Methods for Setup
 
 The following methods expect an instance of Fuseki running on http://fuseki:3030/ with user `admin`  and password `pw123`. 
 
-### Docker 
+#### Docker 
 
 ```
 docker build -t tridoc .
 docker run -p 8000:8000 -e TRIDOC_PWD="YOUR PASSWORD HERE" tridoc
 ```
 
-### Yarn
+#### Yarn
 This method also expects that there is a database called `3doc` on the fuseki instance.
 
 If you haven't already, install yarn first. Then run the following:
