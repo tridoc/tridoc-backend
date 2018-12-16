@@ -9,7 +9,7 @@ the tridoc user (the username is currently fixed to 'tridoc'.
 
 On Unix / Linux:
 ```
-export TRIDOC_PWD = "YOUR PASSWORD HERE"
+export TRIDOC_PWD="YOUR PASSWORD HERE"
 ```
 
 On Windows:
