@@ -94,7 +94,7 @@ Parameterizable tags can only be added to a document with a value assigned. By `
 
 # API
 
-| Address                    | Method | Description                 | Request / Payload  | Response| Status |
+| Address                    | Method | Description                 | Request / Payload  | Response | Status |
 | -                          | -      | -                           | - | - | - |
 | `/count`                   | GET    | Count (matching) documents  | <sup>[1](#f1)</sup> <sup>[3](#f3)</sup> | Number | Implemented |
 | `/doc`                     | POST   | Add / Store Document        | PDF | - | Implemented |
@@ -110,6 +110,7 @@ Parameterizable tags can only be added to a document with a value assigned. By `
 | `/doc/{id}/title`          | GET    | Get document title          | - | `{"title": "the_Title"}` | Implemented |
 | `/doc/{id}/title`          | DELETE | Reset document title        | - | - | Implemented |
 | `/doc/{id}/meta`           | GET    | Get title and tags          | - | - | - |
+| `/raw/rdf`                 | GET    | Get all metadata as RDF. Useful for Backups | <sup>[4](#f4)</sup> | RDF, Content-Type defined over request Headers or ?accept. Fallback to text/turtle. | Implemented |
 | `/tag`                     | POST   | Create new tag              | See above | - | Implemented |
 | `/tag`                     | GET    | Get (list of) all tags      | - | - | Implemented |
 | `/tag/{tagLabel}`          | GET    | Get Documents with this tag | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> | Array of objects with document identifiers and titles (where available) |  Implemented, same as `/doc?tag={tagLabel}` |
@@ -119,6 +120,7 @@ Parameterizable tags can only be added to a document with a value assigned. By `
 
 <sup id="f1">[1](#f1)</sup> : ?text \
 <sup id="f2">[2](#f2)</sup> : ?limit and ?offset \
-<sup id="f3">[3](#f3)</sup> : ?tag
+<sup id="f3">[3](#f3)</sup> : ?tag \
+<sup id="f4">[4](#f4)</sup> : ?accept
 
 > Deleting / editing comments might be supportet in the future
