@@ -109,7 +109,7 @@ Parameterizable tags can only be added to a document with a value assigned. By `
 | `/doc/{id}/title`          | PUT    | Set document title          | `{"title": "the_Title"}` | - | Implemented |
 | `/doc/{id}/title`          | GET    | Get document title          | - | `{"title": "the_Title"}` | Implemented |
 | `/doc/{id}/title`          | DELETE | Reset document title        | - | - | Implemented |
-| `/doc/{id}/meta`           | GET    | Get title and tags          | - | - | - |
+| `/doc/{id}/meta`           | GET    | Get title and tags          | - | `{"title": "the_Title", "tags":[ ... ]}` | Implemented |
 | `/raw/rdf`                 | GET    | Get all metadata as RDF. Useful for Backups | <sup>[4](#f4)</sup> | RDF, Content-Type defined over request Headers or ?accept. Fallback to text/turtle. | Implemented |
 | `/raw/tgz`                 | GET    | Get all data. Useful for Backups | - | Contains blobs/ directory with all pdfs as stored within tridoc and a rdf.ttl file with all metadata. | Implemented |
 | `/tag`                     | POST   | Create new tag              | See above | - | Implemented |
