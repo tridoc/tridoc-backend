@@ -58,6 +58,9 @@ Simple tags can be created by `POST` to `/tag`. You need to send an JSON object 
 
 > Note: `label` must be unique.
 
+> The label must not contain any of the following: whitespace, `/`, `\`, `#`, `"`, `'`, `,`, `;`, `:`, `?`;\
+> The label must not equal `.` (single dot) or `..` (double dot).
+
 Tags can be added to a document by `POST` to `/doc/{id}/tag`. You need to send an JSON object like the one above.
 
 > Tags must be created before adding them to a document.
