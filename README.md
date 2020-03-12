@@ -133,7 +133,7 @@ When getting a comment, a JSON array with objects of the following structure is 
 | `/doc/{id}/title`          | PUT    | Set document title                   | `{"title": "the_Title"}` | - | 1.1.0 |
 | `/doc/{id}/title`          | GET    | Get document title                   | - | `{"title": "the_Title"}` | 1.1.0 |
 | `/doc/{id}/title`          | DELETE | Reset document title                 | - | - | 1.1.0 |
-| `/doc/{id}/meta`           | GET    | Get title and tags                   | - | `{"title": "the_Title", "tags":[ ... ]}` | 1.1.0 |
+| `/doc/{id}/meta`           | GET    | Get various metadata                 | - | `{"title": "the_Title", "tags":[...], "comments": [...] ... }` | 1.1.0 \| .comments & .created in 1.2.1 |
 | `/raw/rdf`                 | GET    | Get all metadata as RDF. Useful for Backups | <sup>[4](#f4)</sup> | RDF, Content-Type defined over request Headers or ?accept. Fallback to text/turtle. | 1.1.0 |
 | `/raw/tgz`                 | GET    | Get all data. Useful for Backups     | - | Contains blobs/ directory with all pdfs as stored within tridoc and a rdf.ttl file with all metadata. | 1.1.0 |
 | `/tag`                     | POST   | Create new tag                       | See above | - | 1.1.0 |
