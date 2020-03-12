@@ -44,11 +44,11 @@ yarn install
 yarn start
 ```
 
-# Tag System
+## Tag System
 
 There are two types of tags: simple tags and parameterizable tags. Parameterizable tags need a parameter to become a parameterized tag wich can be added to a document.
 
-## Simple Tags
+### Simple Tags
 
 Simple tags can be created by `POST` to `/tag`. You need to send an JSON object like this:
 
@@ -65,7 +65,7 @@ Tags can be added to a document by `POST` to `/doc/{id}/tag`. You need to send a
 
 > Tags must be created before adding them to a document.
 
-## Parameterizable & Parameterized Tags
+### Parameterizable & Parameterized Tags
 
 Parameterizable tags can be created by `POST` to `/tag` too. You need to send an JSON object like this:
 
@@ -95,7 +95,28 @@ Parameterizable tags can only be added to a document with a value assigned. By `
 
 > A parameterizable tag with this `label` and `parameter.type` has to be created before.
 
-# API
+## Comments
+
+Tags can be added to a document by `POST` to `/doc/{id}/comment`
+
+You can either send an JSON document like the following
+
+```json
+{
+    "text": "This is a comment"
+}
+```
+
+When getting a comment, a JSON array with objects of the following structure is provided:
+
+```json
+{
+    "text": "This is a comment",
+    "created": "2020-03-12T10:07:20.493Z"
+}
+```
+
+## API
 
 | Address                    | Method | Description                          | Request / Payload  | Response | Implemented in Version |
 | -                          | -      | -                                    | - | - | - |
@@ -104,8 +125,8 @@ Parameterizable tags can only be added to a document with a value assigned. By `
 | `/doc`                     | GET    | Get List of all (matching) documents | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> <sup>[3](#f3)</sup> | Array of objects with document identifiers and titles (where available) | 1.1.0 |
 | `/doc/{id}`                | GET    | Get this document                    | - | PDF | 1.1.0 |
 | `/doc/{id}`                | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | - | - | 1.1.0 |
-| `/doc/{id}/comment`        | POST   | Add comment to document              | - | - | - |
-| `/doc/{id}/comment`        | GET    | Get comments                         | - | - | - |
+| `/doc/{id}/comment`        | POST   | Add comment to document              | Comment object / See above | - | 1.2.0 |
+| `/doc/{id}/comment`        | GET    | Get comments                         | - | Array of tag objects | 1.2.0 |
 | `/doc/{id}/tag`            | POST   | Add a tag to document                | Tag object / See above | - | 1.1.0 |
 | `/doc/{id}/tag`            | GET    | Get tags of document                 | - | Array of tag objects | 1.1.0 |
 | `/doc/{id}/tag/{tagLabel}` | DELETE | Remove tag from document             | - | - | 1.1.0 |
