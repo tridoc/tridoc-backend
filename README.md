@@ -26,7 +26,7 @@ docker-compose up
 
 ### Alternative Methods for Setup
 
-The following methods expect an instance of Fuseki running on http://fuseki:3030/ with user `admin`  and password `pw123`. 
+The following methods expect an instance of Fuseki running on http://fuseki:3030/ with user `admin`  and password `pw123`. This fuseki instance must have lucene indexing enabled and configured as in [config-tdb.ttl](config-tdb.ttl).
 
 #### Docker 
 
