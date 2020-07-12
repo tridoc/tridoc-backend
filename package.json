@@ -7,6 +7,7 @@
   "author": "Noam Bachmann <noam@factsmission.com>",
   "license": "MIT",
   "dependencies": {
+    "adm-zip": "^0.4.16",
     "archiver": "^3.1.1",
     "hapi": "^17.5.2",
     "hapi-auth-basic": "^5.0.0",
