@@ -17,6 +17,5 @@ services:
     ports:
       - "8001:3030" # handy for development, remove in production
     volumes:
-      - ./fuseki-data:/fuseki
-      - ./fuseki-DB:/jena-fuseki/DB
-      - ./config-tdb.ttl:/jena-fuseki/config-tdb
+      - ./fuseki-base:/fuseki/base
+      - ./config-tdb.ttl:/fuseki/set-up-resources/config-tdb
