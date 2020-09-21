@@ -16,7 +16,7 @@
     "pdfjs-dist": "^2.0.489"
   },
   "scripts": {
-    "start": "TRIDOC_PWD='tridoc' node lib/server.js",
+    "start": "node lib/server.js",
     "start-with-pwd": "TRIDOC_PWD='tridoc' node lib/server.js"
   }
 }
