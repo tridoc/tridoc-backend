@@ -1,4 +1,4 @@
-FROM node:8.11-alpine
+FROM node:12.18-alpine
 EXPOSE 8000
 RUN apk add --no-cache curl bash
 RUN mkdir -p /usr/src/app
