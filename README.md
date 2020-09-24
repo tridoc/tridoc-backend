@@ -121,7 +121,7 @@ When getting a comment, a JSON array with objects of the following structure is 
 | Address                    | Method | Description                          | Request / Payload  | Response | Implemented in Version |
 | -                          | -      | -                                    | - | - | - |
 | `/count`                   | GET    | Count (matching) documents           | <sup>[1](#f1)</sup> <sup>[3](#f3)</sup> | Number | 1.1.0 |
-| `/doc`                     | POST   | Add / Store Document                 | PDF | - | 1.1.0 |
+| `/doc`                     | POST   | Add / Store Document                 | PDF<sup>[5](#f5)</sup> | - | 1.1.0 |
 | `/doc`                     | GET    | Get List of all (matching) documents | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> <sup>[3](#f3)</sup> | Array of objects with document identifiers and titles (where available) | 1.1.0 |
 | `/doc/{id}`                | GET    | Get this document                    | - | PDF | 1.1.0 |
 | `/doc/{id}`                | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | - | - | 1.1.0 |
@@ -149,5 +149,6 @@ When getting a comment, a JSON array with objects of the following structure is 
 <sup id="f2">[2](#f2)</sup> : ?limit and ?offset \
 <sup id="f3">[3](#f3)</sup> : ?tag and ?nottag \
 <sup id="f4">[4](#f4)</sup> : ?accept
+<sup id="f5">[5](#f5)</sup> : ?date followed by an ISO 8601 date string including time and timezone, seconds optional, sets creation date
 
 > Deleting / editing comments might be supportet in the future
