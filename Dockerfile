@@ -1,7 +1,7 @@
 FROM node:12.18-buster
 EXPOSE 8000
-RUN apt update
-RUN apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra
+RUN apt update \
+    && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra
 RUN rm /etc/ImageMagick-6/policy.xml
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
