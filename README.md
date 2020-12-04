@@ -146,8 +146,17 @@ When getting a comment, a JSON array with objects of the following structure is 
 #### URL-Paramters supported:
 
 <sup id="f1">[1](#f1)</sup> : ?text \
-<sup id="f2">[2](#f2)</sup> : ?limit and ?offset \
+<sup id="f2">[2](#f2)</sup> : ?limit and ?offset
+
 <sup id="f3">[3](#f3)</sup> : ?tag and ?nottag \
+Since 1.4.4, filtering for Tag Ranges is possible with the following syntax: `…={label};{min};{max}`. `min` or `max` may be ommitted for unbounded search. Trailing semocolons may be omitted.
+Example:
+```
+…?tag=foo;;30&tag=bar;2020-01-01;2020-12-31
+```
+gives all that have tag foo with a value <= 30, and bar values within 2020.
+> Be aware that this may need replacing of the caracter `;` by `%3B`.
+
 <sup id="f4">[4](#f4)</sup> : ?accept
 <sup id="f5">[5](#f5)</sup> : ?date followed by an ISO 8601 date string including time and timezone, seconds optional, sets creation date
 
