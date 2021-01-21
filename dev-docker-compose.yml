@@ -14,6 +14,8 @@ services:
     image: "linkedsolutions/fuseki"
     environment:
       ADMIN_PASSWORD: "pw123"
+    ports:
+      - "8001:3030" # handy for development, remove in production
     volumes:
       - ./fuseki-base:/fuseki/base
       - ./config-tdb.ttl:/fuseki/set-up-resources/config-tdb

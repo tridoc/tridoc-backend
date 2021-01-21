@@ -2,47 +2,34 @@
 
 Server-side infrastructure for tridoc: easy document management for individuals and small teams.
 
+## Table Of Contents
+* [Setup](#setup)
+* [Tag System](#tag-system)
+    * [Simple Tags](#simple-tags)
+    * [Parameterizable &amp; Parameterized Tags](#parameterizable--parameterized-tags)
+* [Comments](#comments)
+* [API](#api)
+
 ## Setup
 
-You need to set the environment variable TRIDOC_PWD to set the password of
-the tridoc user (the username is currently fixed to 'tridoc'.
+This will setup tridoc on port 8000 and fuseki avaliable on port 8001.
+Make sure you have `docker-compose` installed.
 
-On Unix / Linux:
-```
+Replace `YOUR PASSWORD HERE` in the first command with your choice of password.
+
+Unix/Linux/wsl:
+```bash
 export TRIDOC_PWD="YOUR PASSWORD HERE"
+docker-compose build
+docker-compose up
 ```
 
-On Windows:
-```
+On windows, relpace the first line with:
+```powershell
 $env:TRIDOC_PWD = "YOUR PASSWORD HERE"
 ```
 
-### Setup with Docker-compose 
-
-```
-docker-compose build
-docker-compose up
-``` 
-
-### Alternative Methods for Setup
-
-The following methods expect an instance of Fuseki running on http://fuseki:3030/ with user `admin`  and password `pw123`. This fuseki instance must have lucene indexing enabled and configured as in [config-tdb.ttl](config-tdb.ttl).
-
-#### Docker 
-
-```
-docker build -t tridoc .
-docker run -p 8000:8000 -e TRIDOC_PWD="YOUR PASSWORD HERE" tridoc
-```
-
-#### Yarn
-This method also expects that there is a database called `3doc` on the fuseki instance.
-
-If you haven't already, install yarn first. Then run the following:
-```
-yarn install
-yarn start
-```
+_For more Setup options see the <a href="./DEV-README.md">DEV-README.md</a>_
 
 ## Tag System
 
@@ -143,7 +130,7 @@ When getting a comment, a JSON array with objects of the following structure is 
 | `/tag/{tagLabel}`          | DELETE | Delete this tag                      | - | - | 1.1.0 |
 | `/version`                 | GET    | Get tridoc version                   | - | semver version number | 1.1.0 |
 
-#### URL-Paramters supported:
+#### URL-Parameters supported:
 
 <sup id="f1">[1](#f1)</sup> : ?text \
 <sup id="f2">[2](#f2)</sup> : ?limit and ?offset
@@ -160,4 +147,4 @@ gives all that have tag foo with a value <= 30, and bar values within 2020.
 <sup id="f4">[4](#f4)</sup> : ?accept
 <sup id="f5">[5](#f5)</sup> : ?date followed by an ISO 8601 date string including time and timezone, seconds optional, sets creation date
 
-> Deleting / editing comments might be supportet in the future
+> Deleting / editing comments might be supported in the future
