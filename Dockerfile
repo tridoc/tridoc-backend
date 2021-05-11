@@ -1,4 +1,4 @@
-FROM node:12.18-buster
+FROM node:lts-buster
 EXPOSE 8000
 RUN apt update \
     && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra
