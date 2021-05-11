@@ -1,6 +1,6 @@
 {
   "name": "tridoc-backend",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "Simple RDF-Based Document Management System",
   "main": "lib/server",
   "repository": "git@github.com:tridoc/tridoc-backend.git",
