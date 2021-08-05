@@ -123,8 +123,8 @@ When getting a comment, a JSON array with objects of the following structure is 
 | `/doc/{id}/title`          | DELETE | Reset document title                 | - | - | 1.1.0 |
 | `/doc/{id}/meta`           | GET    | Get various metadata                 | - | `{"title": "the_Title", "tags":[...], "comments": [...] ... }` | 1.1.0 \| .comments & .created in 1.2.1 |
 | `/raw/rdf`                 | GET    | Get all metadata as RDF. Useful for Backups | <sup>[4](#f4)</sup> | RDF, Content-Type defined over request Headers or ?accept. Fallback to text/turtle. | 1.1.0 |
-| `/raw/zip` or `/raw/tgz`   | GET    | Get all data. Useful for backups     | - | Contains blobs/ directory with all pdfs as stored within tridoc and a rdf.ttl file with all metadata. | 1.3.0 |
-| `/raw/zip`                 | PUT    | Replace all data with backup zip     | - | Replaces the metadata and adds the blobs from the zip | 1.3.0 |
+| `/raw/zip` or `/raw/tgz`   | GET    | Get all data. Useful for backups     | - | ZIP / TGZ containing blobs/ directory with all pdfs as stored within tridoc and a rdf.ttl file with all metadata. | 1.3.0 |
+| `/raw/zip`                 | PUT    | Replace all data with backup zip     | ZIP | Replaces the metadata and adds the blobs from the zip | 1.3.0 |
 | `/tag`                     | POST   | Create new tag                       | See above | - | 1.1.0 |
 | `/tag`                     | GET    | Get (list of) all tags               | - | - | 1.1.0 |
 | `/tag/{tagLabel}`          | GET    | Get Documents with this tag. Same as `/doc?tag={tagLabel}` | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> | Array of objects with document identifiers and titles (where available) |  1.1.0 |
@@ -145,7 +145,7 @@ Example:
 gives all that have tag foo with a value <= 30, and bar values within 2020.
 > Be aware that this may need replacing of the caracter `;` by `%3B`.
 
-<sup id="f4">[4](#f4)</sup> : ?accept
+<sup id="f4">[4](#f4)</sup> : ?accept \
 <sup id="f5">[5](#f5)</sup> : ?date followed by an ISO 8601 date string including time and timezone, seconds optional, sets creation date
 
 > Deleting / editing comments might be supported in the future
