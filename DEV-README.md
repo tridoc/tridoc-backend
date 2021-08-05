@@ -61,3 +61,9 @@ yarn install
 bash docker-cmd.sh
 ```
 
+## Tips & Tricks
+
+- Upload Backups with
+```sh
+curl -D - -X PUT --data-binary @tridoc_backup_sumthing.zip -H "content-Type: application/zip" -u tridoc:pw123 http://localhost:8000/raw/zip
+```
