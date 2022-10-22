@@ -107,7 +107,7 @@ When getting a comment, a JSON array with objects of the following structure is 
 
 | Address                    | Method | Description                          | Request / Payload  | Response | Implemented in Version | deno? |
 | -                          | -      | -                                    | - | - | - | - |
-| `/count`                   | GET    | Count (matching) documents           | <sup>[1](#f1)</sup> <sup>[3](#f3)</sup> | Number | 1.1.0 |
+| `/count`                   | GET    | Count (matching) documents           | <sup>[1](#f1)</sup> <sup>[3](#f3)</sup> | Number | 1.1.0 | ✅ |
 | `/doc`                     | POST   | Add / Store Document                 | PDF<sup>[5](#f5)</sup> | - | 1.1.0 |
 | `/doc`                     | GET    | Get List of all (matching) documents | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> <sup>[3](#f3)</sup> | Array of objects with document identifiers and titles (where available) | 1.1.0 |
 | `/doc/{id}`                | GET    | Get this document                    | - | PDF | 1.1.0 |
