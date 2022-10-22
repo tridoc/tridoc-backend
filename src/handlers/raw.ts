@@ -1,4 +1,5 @@
 import { emptyDir, writableStreamFromWriter } from "../deps.ts";
+import { respond } from "../helpers/cors.ts";
 import { restore } from "../meta/store.ts";
 
 const decoder = new TextDecoder("utf-8");
@@ -8,7 +9,7 @@ export async function deleteRdfFile(
   _match: URLPatternResult,
 ): Promise<Response> {
   await Deno.remove("rdf.ttl");
-  return new Response("200: OK");
+  return respond("200: OK");
 }
 
 export async function putZip(
@@ -37,7 +38,7 @@ export async function putZip(
     const turtleData = decoder.decode(await Deno.readFile("rdf.ttl"));
     await Deno.remove("rdf.ttl");
     await restore(turtleData);
-    return new Response("200: OK");
+    return respond("200: OK");
   } else {
     throw new Error("unzip failed with code " + code);
   }
