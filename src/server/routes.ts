@@ -1,4 +1,5 @@
 import { notImplemented } from "../handlers/notImplemented.ts";
+import { version } from "../handlers/version.ts";
 
 export const routes: {
   [method: string]: {
@@ -47,7 +48,7 @@ export const routes: {
     handler: notImplemented,
   }, {
     pattern: new URLPattern({ pathname: "/version" }),
-    handler: notImplemented,
+    handler: version,
   }],
   "POST": [{
     pattern: new URLPattern({ pathname: "/doc" }),
