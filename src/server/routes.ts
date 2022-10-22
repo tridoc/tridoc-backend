@@ -1,7 +1,8 @@
 import { options } from "../handlers/cors.ts";
 import { count } from "../handlers/count.ts";
+import * as doc from "../handlers/doc.ts";
 import { notImplemented } from "../handlers/notImplemented.ts";
-import { deleteRdfFile, putZip } from "../handlers/raw.ts";
+import * as raw from "../handlers/raw.ts";
 import { version } from "../handlers/version.ts";
 
 export const routes: {
@@ -19,10 +20,10 @@ export const routes: {
     handler: count,
   }, {
     pattern: new URLPattern({ pathname: "/doc" }),
-    handler: notImplemented,
+    handler: doc.list,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id" }),
-    handler: notImplemented,
+    handler: doc.getPDF,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/comment" }),
     handler: notImplemented,
@@ -75,7 +76,7 @@ export const routes: {
     handler: notImplemented,
   }, {
     pattern: new URLPattern({ pathname: "/raw/zip" }),
-    handler: putZip,
+    handler: raw.putZip,
   }],
   "DELETE": [{
     pattern: new URLPattern({ pathname: "/doc/:id" }),
@@ -91,6 +92,6 @@ export const routes: {
     handler: notImplemented,
   }, {
     pattern: new URLPattern({ pathname: "/raw/rdf" }),
-    handler: deleteRdfFile,
+    handler: raw.deleteRdfFile,
   }],
 };
