@@ -1,8 +1,9 @@
 import { encode, serve as stdServe } from "../deps.ts";
+import { respond } from "../helpers/cors.ts";
 import { routes } from "./routes.ts";
 
 const isAuthenticated = (request: Request) => {
-  return request.headers.get("Authorization") ===
+  return (request.method === "OPTIONS") || request.headers.get("Authorization") ===
     "Basic " + encode("tridoc:" + Deno.env.get("TRIDOC_PWD"));
 };
 
@@ -17,7 +18,7 @@ const handler = async (request: Request): Promise<Response> => {
         path,
         "→ 401: Not Authenticated",
       );
-      return new Response("401: Not Authenticated", {
+      return respond("401: Not Authenticated", {
         status: 401,
         headers: { "WWW-Authenticate": "Basic" },
       });
@@ -36,16 +37,16 @@ const handler = async (request: Request): Promise<Response> => {
       path,
       "→ 404: Path not found",
     );
-    return new Response("404: Path not found", { status: 404 });
+    return respond("404: Path not found", { status: 404 });
   } catch (error) {
     console.log(
       (new Date()).toISOString(),
       request.method,
       path,
-      "→ 500:",
+      "→ 500: ",
       error,
     );
-    return new Response("500: " + error, { status: 500 });
+    return respond("500: " + error, { status: 500 });
   }
 };
 
