@@ -1,10 +1,19 @@
 import { respond } from "../helpers/cors.ts";
 import { processParams } from "../helpers/processParams.ts";
-import { getDocumentList } from "../meta/finder.ts";
+import * as metafinder from "../meta/finder.ts";
 
 function getPath(id: string) {
   return "./blobs/" + id.slice(0, 2) + "/" + id.slice(2, 6) + "/" +
     id.slice(6, 14) + "/" + id;
+}
+
+export async function getComments(
+  _request: Request,
+  match: URLPatternResult,
+): Promise<Response> {
+  const id = match.pathname.groups.id;
+  const response = await metafinder.getComments(id);
+  return respond(JSON.stringify(response));
 }
 
 export async function getPDF(
@@ -31,6 +40,6 @@ export async function list(
   _match: URLPatternResult,
 ): Promise<Response> {
   const params = await processParams(request);
-  const response = await getDocumentList(params);
+  const response = await metafinder.getDocumentList(params);
   return respond(JSON.stringify(response));
 }

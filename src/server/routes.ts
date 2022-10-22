@@ -26,7 +26,7 @@ export const routes: {
     handler: doc.getPDF,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/comment" }),
-    handler: notImplemented,
+    handler: doc.getComments,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/tag" }),
     handler: notImplemented,

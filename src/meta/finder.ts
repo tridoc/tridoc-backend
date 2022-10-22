@@ -1,6 +1,39 @@
 import { Params } from "../helpers/processParams.ts";
 
-/** takes: { tags: [string, string, string][], nottags: [string, string, string][], text: string, limit: number, offset: number } */
+export async function getComments(id: string) {
+  const query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX tridoc:  <http://vocab.tridoc.me/>
+PREFIX s: <http://schema.org/>
+SELECT DISTINCT ?d ?t WHERE {
+  GRAPH <http://3doc/meta> {
+      <http://3doc/data/${id}> s:comment [
+          a s:Comment ;
+          s:dateCreated ?d ;
+          s:text ?t
+      ] .
+  }
+}`;
+  return await fetch("http://fuseki:3030/3DOC/query", {
+    method: "POST",
+    headers: {
+      "Authorization": "Basic " + btoa("admin:pw123"),
+      "Content-Type": "application/sparql-query",
+    },
+    body: query,
+  }).then((response) => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error("" + response);
+    }
+  }).then((json) =>
+    json.results.bindings.map((binding: Record<string, { value: string }>) => {
+      return { text: binding.t.value, created: binding.d.value };
+    })
+  );
+}
+
 export async function getDocumentList(
   { tags = [], nottags = [], text, limit, offset }: Params,
 ) {
@@ -79,12 +112,7 @@ export async function getDocumentList(
   }).then((response) => response.json()).then((json) =>
     json.results.bindings.map(
       (
-        binding: {
-          s: { value: string };
-          identifier: { value: string };
-          title?: { value: string };
-          date?: { value: string };
-        },
+        binding: Record<string, { value: string }>,
       ) => {
         const result: Record<string, string> = {};
         result.identifier = binding.identifier.value;
