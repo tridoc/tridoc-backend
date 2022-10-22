@@ -1,6 +1,6 @@
 export function notImplemented(
   _request: Request,
   _match: URLPatternResult,
-): Response {
+): Promise<Response> {
   throw new Error("not implemented");
 }

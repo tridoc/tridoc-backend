@@ -8,7 +8,7 @@ RUN mkdir -p /usr/src/app/src
 WORKDIR /usr/src/app
 
 RUN apt update \
-    && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra curl git
+    && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra curl git zip unzip
 RUN rm /etc/ImageMagick-6/policy.xml
 
 USER deno

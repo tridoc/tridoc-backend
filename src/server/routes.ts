@@ -1,10 +1,11 @@
 import { notImplemented } from "../handlers/notImplemented.ts";
+import { deleteRdfFile, putZip } from "../handlers/raw.ts";
 import { version } from "../handlers/version.ts";
 
 export const routes: {
   [method: string]: {
     pattern: URLPattern;
-    handler: (request: Request, match: URLPatternResult) => Response;
+    handler: (request: Request, match: URLPatternResult) => Promise<Response>;
   }[];
 } = {
   "GET": [{
@@ -68,7 +69,7 @@ export const routes: {
     handler: notImplemented,
   }, {
     pattern: new URLPattern({ pathname: "/raw/zip" }),
-    handler: notImplemented,
+    handler: putZip,
   }],
   "DELETE": [{
     pattern: new URLPattern({ pathname: "/doc/:id" }),
@@ -82,5 +83,8 @@ export const routes: {
   }, {
     pattern: new URLPattern({ pathname: "/tag/:tagLabel" }),
     handler: notImplemented,
+  }, {
+    pattern: new URLPattern({ pathname: "/raw/rdf" }),
+    handler: deleteRdfFile,
   }],
 };

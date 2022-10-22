@@ -105,8 +105,8 @@ When getting a comment, a JSON array with objects of the following structure is 
 
 ## API
 
-| Address                    | Method | Description                          | Request / Payload  | Response | Implemented in Version |
-| -                          | -      | -                                    | - | - | - |
+| Address                    | Method | Description                          | Request / Payload  | Response | Implemented in Version | deno? |
+| -                          | -      | -                                    | - | - | - | - |
 | `/count`                   | GET    | Count (matching) documents           | <sup>[1](#f1)</sup> <sup>[3](#f3)</sup> | Number | 1.1.0 |
 | `/doc`                     | POST   | Add / Store Document                 | PDF<sup>[5](#f5)</sup> | - | 1.1.0 |
 | `/doc`                     | GET    | Get List of all (matching) documents | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> <sup>[3](#f3)</sup> | Array of objects with document identifiers and titles (where available) | 1.1.0 |
@@ -123,13 +123,14 @@ When getting a comment, a JSON array with objects of the following structure is 
 | `/doc/{id}/title`          | DELETE | Reset document title                 | - | - | 1.1.0 |
 | `/doc/{id}/meta`           | GET    | Get various metadata                 | - | `{"title": "the_Title", "tags":[...], "comments": [...] ... }` | 1.1.0 \| .comments & .created in 1.2.1 |
 | `/raw/rdf`                 | GET    | Get all metadata as RDF. Useful for Backups | <sup>[4](#f4)</sup> | RDF, Content-Type defined over request Headers or ?accept. Fallback to text/turtle. | 1.1.0 |
+| `/raw/rdf`                 | DELETE | "Cancel" failed zip upload—use only if certain it’s done & failed | | | (deno only) | ✅ |
 | `/raw/zip` or `/raw/tgz`   | GET    | Get all data. Useful for backups     | - | ZIP / TGZ containing blobs/ directory with all pdfs as stored within tridoc and a rdf.ttl file with all metadata. | 1.3.0 |
-| `/raw/zip`                 | PUT    | Replace all data with backup zip     | ZIP | Replaces the metadata and adds the blobs from the zip | 1.3.0 |
+| `/raw/zip`                 | PUT    | Replace all data with backup zip     | ZIP | Replaces the metadata and adds the blobs from the zip | 1.3.0 | ✅ |
 | `/tag`                     | POST   | Create new tag                       | See above | - | 1.1.0 |
 | `/tag`                     | GET    | Get (list of) all tags               | - | - | 1.1.0 |
 | `/tag/{tagLabel}`          | GET    | Get Documents with this tag. Same as `/doc?tag={tagLabel}` | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> | Array of objects with document identifiers and titles (where available) |  1.1.0 |
 | `/tag/{tagLabel}`          | DELETE | Delete this tag                      | - | - | 1.1.0 |
-| `/version`                 | GET    | Get tridoc version                   | - | semver version number | 1.1.0 |
+| `/version`                 | GET    | Get tridoc version                   | - | semver version number | 1.1.0 | ✅ |
 
 #### URL-Parameters supported:
 

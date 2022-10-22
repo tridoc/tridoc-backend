@@ -6,7 +6,7 @@ const isAuthenticated = (request: Request) => {
     "Basic " + encode("tridoc:" + Deno.env.get("TRIDOC_PWD"));
 };
 
-const handler = (request: Request): Response => {
+const handler = async (request: Request): Promise<Response> => {
   const path = request.url.slice(request.url.indexOf("/", "https://".length));
   console.log((new Date()).toISOString(), request.method, path);
   try {
@@ -27,14 +27,14 @@ const handler = (request: Request): Response => {
       pattern.test(request.url)
     );
     if (route) {
-      return route.handler(request, route.pattern.exec(request.url)!);
+      return await route.handler(request, route.pattern.exec(request.url)!);
     }
 
     console.log(
       (new Date()).toISOString(),
       request.method,
       path,
-      "→ 404: Path not foun",
+      "→ 404: Path not found",
     );
     return new Response("404: Path not found", { status: 404 });
   } catch (error) {
