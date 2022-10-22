@@ -1,3 +1,79 @@
+import { Params } from "../helpers/processParams.ts";
+
+export async function getDocumentNumber(
+  { tags = [], nottags = [], text = "" }: Params,
+) {
+  let tagQuery = "";
+  for (let i = 0; i < tags.length; i++) {
+    if (tags[i].type) {
+      tagQuery += `{  ?s tridoc:tag ?ptag${i} .
+  ?ptag${i} tridoc:parameterizableTag ?atag${i} .
+  ?ptag${i} tridoc:value ?v${i} .
+  ?atag${i} tridoc:label "${tags[i].label}" .
+  ${
+        tags[i].min
+          ? `FILTER (?v${i} >= "${tags[i].min}"^^<${tags[i].type}> )`
+          : ""
+      }
+  ${
+        tags[i].max
+          ? `FILTER (?v${i} ${tags[i].maxIsExclusive ? "<" : "<="} "${
+            tags[i].max
+          }"^^<${tags[i].type}> )`
+          : ""
+      } }`;
+    } else {
+      tagQuery += `{  ?s tridoc:tag ?tag${i} .
+  ?tag${i} tridoc:label "${tags[i].label}" . }`;
+    }
+  }
+  for (let i = 0; i < nottags.length; i++) {
+    if (nottags[i].type) {
+      tagQuery += `FILTER NOT EXISTS { ?s tridoc:tag ?ptag${i} .
+  ?ptag${i} tridoc:parameterizableTag ?atag${i} .
+  ?ptag${i} tridoc:value ?v${i} .
+  ?atag${i} tridoc:label "${nottags[i].label}" .
+  ${
+        nottags[i].min
+          ? `FILTER (?v${i} >= "${nottags[i].min}"^^<${nottags[i].type}> )`
+          : ""
+      }
+  ${
+        nottags[i].max
+          ? `FILTER (?v${i} ${nottags[i].maxIsExclusive ? "<" : "<="} "${
+            nottags[i].max
+          }"^^<${nottags[i].type}> )`
+          : ""
+      } }`;
+    } else {
+      tagQuery += `FILTER NOT EXISTS { ?s tridoc:tag ?tag${i} .
+  ?tag${i} tridoc:label "${nottags[i].label}" . }`;
+    }
+  }
+  return await fetch("http://fuseki:3030/3DOC/query", {
+    method: "POST",
+    headers: {
+      "Authorization": "Basic " + btoa("admin:pw123"),
+      "Content-Type": "application/sparql-query",
+    },
+    body: "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+      "PREFIX s: <http://schema.org/>\n" +
+      "PREFIX tridoc:  <http://vocab.tridoc.me/>\n" +
+      "PREFIX text: <http://jena.apache.org/text#>\n" +
+      "SELECT (COUNT(DISTINCT ?s) as ?count)\n" +
+      "WHERE {\n" +
+      "  ?s s:identifier ?identifier .\n" +
+      tagQuery +
+      (text
+        ? '{ { ?s text:query (s:name "' + text +
+          '") } UNION { ?s text:query (s:text "' + text + '")} } .\n'
+        : "") +
+      "}",
+  }).then((response) => response.json()).then((json) =>
+    json.results.bindings[0].count.value as number
+  );
+}
+
 export async function getTagTypes(labels: string[]): Promise<string[]> {
   const response = await fetch("http://fuseki:3030/3DOC/query", {
     method: "POST",

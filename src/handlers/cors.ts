@@ -6,7 +6,7 @@ export function options(
 ): Promise<Response> {
   return new Promise((resolve) =>
     resolve(
-      respond(undefined, { status: 204 })
+      respond(undefined, { status: 204 }),
     )
   );
 }

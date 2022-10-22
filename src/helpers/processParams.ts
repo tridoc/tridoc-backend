@@ -12,14 +12,14 @@ function extractQuery(request: Request) {
 }
 
 type ParamTag = {
-  label: string;
-  min?: string;
-  max?: string;
-  type?: string;
-  maxIsExclusive?: boolean;
+  label: string; // [0]
+  min?: string; // [1]
+  max?: string; // [2]
+  type?: string; // [3]
+  maxIsExclusive?: boolean; //[5]
 };
 
-type Params = {
+export type Params = {
   tags?: ParamTag[];
   nottags?: ParamTag[];
   text?: string;

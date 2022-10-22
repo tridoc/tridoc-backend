@@ -1,4 +1,5 @@
 import { options } from "../handlers/cors.ts";
+import { count } from "../handlers/count.ts";
 import { notImplemented } from "../handlers/notImplemented.ts";
 import { deleteRdfFile, putZip } from "../handlers/raw.ts";
 import { version } from "../handlers/version.ts";
@@ -15,7 +16,7 @@ export const routes: {
   }],
   "GET": [{
     pattern: new URLPattern({ pathname: "/count" }),
-    handler: notImplemented,
+    handler: count,
   }, {
     pattern: new URLPattern({ pathname: "/doc" }),
     handler: notImplemented,

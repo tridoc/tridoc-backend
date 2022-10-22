@@ -3,8 +3,9 @@ import { respond } from "../helpers/cors.ts";
 import { routes } from "./routes.ts";
 
 const isAuthenticated = (request: Request) => {
-  return (request.method === "OPTIONS") || request.headers.get("Authorization") ===
-    "Basic " + encode("tridoc:" + Deno.env.get("TRIDOC_PWD"));
+  return (request.method === "OPTIONS") ||
+    request.headers.get("Authorization") ===
+      "Basic " + encode("tridoc:" + Deno.env.get("TRIDOC_PWD"));
 };
 
 const handler = async (request: Request): Promise<Response> => {
