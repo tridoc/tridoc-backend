@@ -1,0 +1,11 @@
+{
+  "fmt": {
+    "files": {
+      "include": ["src/"]
+    }
+  },
+  "tasks": {
+    "run": "deno run --allow-net --allow-read=blobs --allow-write=blobs --allow-run=convert,pdfsandwich --allow-env=TRIDOC_PWD src/main.ts",
+    "run-watch": "deno run --watch --allow-net --allow-read=blobs --allow-write=blobs --allow-run=convert,pdfsandwich --allow-env=TRIDOC_PWD src/main.ts"
+  }
+}
