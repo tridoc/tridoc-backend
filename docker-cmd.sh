@@ -1,10 +1,9 @@
 #!/bin/bash
-sleep 5
 echo 'Attempting to create Dataset "3DOC"'
 curl 'http://fuseki:3030/$/datasets' -H "Authorization: Basic $(echo -n admin:pw123 | base64)" \
     -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' --data 'dbName=3DOC&dbType=tdb'
 set -m
-yarn start &
+deno run --allow-net --allow-read=blobs --allow-write=blobs --allow-run=convert,pdfsandwich --allow-env=TRIDOC_PWD src/main.ts &
 sleep 5
 echo 'Attempting to create Dataset "3DOC"'
 curl 'http://fuseki:3030/$/datasets' -H "Authorization: Basic $(echo -n admin:pw123 | base64)" \
