@@ -3,6 +3,7 @@ import { nanoid, writableStreamFromWriter } from "../deps.ts";
 import { respond } from "../helpers/cors.ts";
 import { getText } from "../helpers/pdfprocessor.ts";
 import { processParams } from "../helpers/processParams.ts";
+import * as metadelete from "../meta/delete.ts";
 import * as metafinder from "../meta/finder.ts";
 import * as metastore from "../meta/store.ts";
 
@@ -22,6 +23,15 @@ function datecheck(request: Request) {
     /^(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-6]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-6]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-6]\d([+-][0-2]\d:[0-5]\d|Z))$/;
   const date = url.searchParams.get("date");
   return date ? (regex.test(date) ? date : undefined) : undefined;
+}
+
+export async function deleteDoc(
+  _request: Request,
+  match: URLPatternResult,
+): Promise<Response> {
+  const id = match.pathname.groups.id;
+  await metadelete.deleteFile(id);
+  return respond(undefined, { status: 204 });
 }
 
 export async function getComments(

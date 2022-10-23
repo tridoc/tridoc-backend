@@ -80,7 +80,7 @@ export const routes: {
   }],
   "DELETE": [{
     pattern: new URLPattern({ pathname: "/doc/:id" }),
-    handler: notImplemented,
+    handler: doc.deleteDoc,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/tag/:tagLabel" }),
     handler: notImplemented,

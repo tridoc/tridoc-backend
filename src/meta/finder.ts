@@ -224,8 +224,8 @@ export async function getBasicMeta(id: string) {
       "}",
   }).then((response) => response.json()).then((json: SparqlJson) => {
     return {
-      title: json.results.bindings[0].title?.value,
-      created: json.results.bindings[0].date?.value,
+      title: json.results.bindings[0]?.title?.value,
+      created: json.results.bindings[0]?.date?.value,
     };
   });
 }
