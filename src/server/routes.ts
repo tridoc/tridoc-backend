@@ -35,7 +35,7 @@ export const routes: {
     handler: doc.getThumb,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/title" }),
-    handler: notImplemented,
+    handler: doc.getTitle,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/meta" }),
     handler: notImplemented,

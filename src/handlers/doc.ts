@@ -78,7 +78,7 @@ export async function getThumb(
   const path = getPath(id);
   const fileName = await metafinder.getBasicMeta(id).then((
     { title, created },
-  ) => title || created || "document");
+  ) => title || created || "thumbnail");
   let thumb: Deno.FsFile;
   try {
     thumb = await Deno.open(path + ".png", { read: true });
@@ -118,6 +118,14 @@ export async function getThumb(
       "content-type": "image/png",
     },
   });
+}
+
+export async function getTitle(
+  _request: Request,
+  match: URLPatternResult,
+): Promise<Response> {
+  const id = match.pathname.groups.id;
+  return respond((await metafinder.getBasicMeta(id)).title);
 }
 
 export async function list(
