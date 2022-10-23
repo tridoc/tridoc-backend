@@ -44,7 +44,7 @@ export const routes: {
     handler: raw.getRDF,
   }, {
     pattern: new URLPattern({ pathname: "/raw/zip" }),
-    handler: notImplemented,
+    handler: raw.getZIP,
   }, {
     pattern: new URLPattern({ pathname: "/raw/tgz" }),
     handler: raw.getTGZ,

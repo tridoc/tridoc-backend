@@ -41,16 +41,6 @@ export async function getTGZ(
   });
   const writableStream = writableStreamFromWriter(rdf);
   await (await dump()).body?.pipeTo(writableStream);
-  /* const p = Deno.run({
-    cmd: [
-      "tar",
-      `--transform=s|${rdfPath}|rdf.ttl|`,
-      `--exclude-tag=${rdfName}`,
-      "-czvf",
-      tarPath,
-      "blobs/* /", // no space!
-    ],
-  }); */
   const p = Deno.run({
     cmd: [
       "bash",
@@ -79,10 +69,8 @@ export async function getZIP(
   _match: URLPatternResult,
 ): Promise<Response> {
   const timestamp = "" + Date.now();
-  const tarPath = "blobs/tgz-" + timestamp;
-  const rdfName = "rdf-" + timestamp;
-  const rdfPath = "blobs/rdf/" + rdfName;
-  await ensureDir("blobs/rdf");
+  const zipPath = `blobs/zip-${timestamp}.zip`;
+  const rdfPath = "blobs/rdf-" + timestamp;
   const rdf = await Deno.open(rdfPath, {
     create: true,
     write: true,
@@ -90,34 +78,35 @@ export async function getZIP(
   });
   const writableStream = writableStreamFromWriter(rdf);
   await (await dump()).body?.pipeTo(writableStream);
-  /* const p = Deno.run({
-    cmd: [
-      "tar",
-      `--transform=s|${rdfPath}|rdf.ttl|`,
-      `--exclude-tag=${rdfName}`,
-      "-czvf",
-      tarPath,
-      "blobs/* /", // no space!
-    ],
-  }); */
-  const p = Deno.run({
+  // Create zip
+  const p_1 = Deno.run({
     cmd: [
       "bash",
       "-c",
-      `tar --transform="s|${rdfPath}|rdf.ttl|" --exclude-tag="${rdfName}" -czvf ${tarPath} blobs/*/`,
+      `zip -r ${zipPath} blobs/*/ ${rdfPath} -x "blobs/rdf/*"`,
     ],
   });
-  const { success, code } = await p.status();
-  if (!success) throw new Error("tar -czf failed with code " + code);
+  const r_1 = await p_1.status();
+  if (!r_1.success) throw new Error("zip failed with code " + r_1.code);
+  // move rdf-??? to rdf.zip
+  const p_2 = Deno.run({
+    cmd: [
+      "bash",
+      "-c",
+      `printf "@ ${rdfPath}\\n@=rdf.ttl\\n" | zipnote -w ${zipPath}`,
+    ],
+  });
+  const r_2 = await p_2.status();
+  if (!r_2.success) throw new Error("zipnote failed with code " + r_2.code);
   await Deno.remove(rdfPath);
-  const tar = await Deno.open(tarPath);
+  const zip = await Deno.open(zipPath);
   // Build a readable stream so the file doesn't have to be fully loaded into memory while we send it
-  const readableStream = tar.readable;
+  const readableStream = zip.readable;
   return respond(readableStream, {
     headers: {
       "content-disposition":
-        `inline; filename="tridoc_backup_${timestamp}.tar.gz"`,
-      "content-type": "application/gzip",
+        `inline; filename="tridoc_backup_${timestamp}.zip"`,
+      "content-type": "application/zip",
     },
   });
   // TODO: Figure out how to delete these files
