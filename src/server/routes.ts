@@ -41,13 +41,13 @@ export const routes: {
     handler: doc.getMeta,
   }, {
     pattern: new URLPattern({ pathname: "/raw/rdf" }),
-    handler: raw.getRdf,
+    handler: raw.getRDF,
   }, {
     pattern: new URLPattern({ pathname: "/raw/zip" }),
     handler: notImplemented,
   }, {
     pattern: new URLPattern({ pathname: "/raw/tgz" }),
-    handler: notImplemented,
+    handler: raw.getTGZ,
   }, {
     pattern: new URLPattern({ pathname: "/tag" }),
     handler: notImplemented,
@@ -76,7 +76,7 @@ export const routes: {
     handler: notImplemented,
   }, {
     pattern: new URLPattern({ pathname: "/raw/zip" }),
-    handler: raw.putZip,
+    handler: raw.putZIP,
   }],
   "DELETE": [{
     pattern: new URLPattern({ pathname: "/doc/:id" }),
@@ -92,6 +92,6 @@ export const routes: {
     handler: notImplemented,
   }, {
     pattern: new URLPattern({ pathname: "/raw/rdf" }),
-    handler: raw.deleteRdfFile,
+    handler: raw.deleteRDFFile,
   }],
 };
