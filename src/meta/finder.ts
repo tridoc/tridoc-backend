@@ -237,6 +237,7 @@ SELECT DISTINCT ?label ?type ?v
   );
 }
 
+// => [label, type?][]
 export async function getTagTypes(labels: string[]) {
   const json = await fusekiFetch(`
 PREFIX tridoc: <http://vocab.tridoc.me/>

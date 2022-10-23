@@ -114,7 +114,7 @@ When getting a comment, a JSON array with objects of the following structure is 
 | `/doc/{id}`                | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | - | - | 1.1.0 | ✅ |
 | `/doc/{id}/comment`        | POST   | Add comment to document              | Comment object / See above | - | 1.2.0 | ✅ |
 | `/doc/{id}/comment`        | GET    | Get comments                         | - | Array of comment objects | 1.2.0 | ✅ |
-| `/doc/{id}/tag`            | POST   | Add a tag to document                | Tag object / See above | - | 1.1.0 |
+| `/doc/{id}/tag`            | POST   | Add a tag to document                | Tag object / See above | - | 1.1.0 | ✅ |
 | `/doc/{id}/tag`            | GET    | Get tags of document                 | - | Array of tag objects | 1.1.0 | ✅ |
 | `/doc/{id}/tag/{tagLabel}` | DELETE | Remove tag from document             | - | - | 1.1.0 |
 | `/doc/{id}/thumb`          | GET    | Get document thumbnail               | - | PNG (300px wide) | 1.5.0 | ✅ |

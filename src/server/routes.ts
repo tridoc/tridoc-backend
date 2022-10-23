@@ -67,7 +67,7 @@ export const routes: {
     handler: doc.postComment,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/tag" }),
-    handler: notImplemented,
+    handler: doc.postTag,
   }, {
     pattern: new URLPattern({ pathname: "/tag" }),
     handler: notImplemented,

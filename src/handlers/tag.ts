@@ -10,15 +10,6 @@ type TagCreate = {
       | "http://www.w3.org/2001/XMLSchema#date";
   }; // only for parameterizable tags
 };
-type TagAdd = {
-  label: string;
-  parameter?: {
-    type:
-      | "http://www.w3.org/2001/XMLSchema#decimal"
-      | "http://www.w3.org/2001/XMLSchema#date";
-    value: string; // must be valid xsd:decimal or xsd:date, as specified in property type.
-  }; // only for parameterizable tags
-};
 
 export async function getDocs(
   request: Request,

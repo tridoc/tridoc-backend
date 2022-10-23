@@ -7,6 +7,16 @@ import * as metadelete from "../meta/delete.ts";
 import * as metafinder from "../meta/finder.ts";
 import * as metastore from "../meta/store.ts";
 
+type TagAdd = {
+  label: string;
+  parameter?: {
+    type:
+      | "http://www.w3.org/2001/XMLSchema#decimal"
+      | "http://www.w3.org/2001/XMLSchema#date";
+    value: string; // must be valid xsd:decimal or xsd:date, as specified in property type.
+  }; // only for parameterizable tags
+};
+
 function getDir(id: string) {
   return "./blobs/" + id.slice(0, 2) + "/" + id.slice(2, 6) + "/" +
     id.slice(6, 14);
@@ -211,4 +221,28 @@ export async function postPDF(
       "Access-Control-Expose-Headers": "Location",
     },
   });
+}
+
+export async function postTag(
+  request: Request,
+  match: URLPatternResult,
+): Promise<Response> {
+  const id = match.pathname.groups.id;
+  const tagObject: TagAdd = await request.json();
+  const [label, type] =
+    (await metafinder.getTagTypes([tagObject.label]))?.[0] ??
+      [undefined, undefined];
+  if (!label) {
+    return respond("Tag must exist before adding to a document", {
+      status: 400,
+    });
+  }
+  if (tagObject.parameter?.type !== type) {
+    return respond("Type provided does not match", { status: 400 });
+  }
+  if (tagObject.parameter?.type && !tagObject.parameter?.value) {
+    return respond("No value provided", { status: 400 });
+  }
+  await metastore.addTag(id, tagObject.label, tagObject.parameter?.value, type);
+  return respond(undefined, { status: 204 });
 }

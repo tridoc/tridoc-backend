@@ -26,6 +26,35 @@ INSERT DATA {
   return await fusekiUpdate(query);
 }
 
+export async function addTag(
+  id: string,
+  label: string,
+  value: string,
+  type: string,
+) {
+  const tag = value
+    ? encodeURIComponent(label) + "/" + value
+    : encodeURIComponent(label);
+  const query = `
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX tridoc: <http://vocab.tridoc.me/>
+PREFIX s: <http://schema.org/>
+INSERT DATA {
+  GRAPH <http://3doc/meta> {
+    <http://3doc/data/${id}> tridoc:tag <http://3doc/tag/${tag}> .${
+    value
+      ? `
+    <http://3doc/tag/${tag}> a tridoc:ParameterizedTag ;
+      tridoc:parameterizableTag <http://3doc/tag/${encodeURIComponent(label)}>;
+      tridoc:value "${value}"^^<${type}> .`
+      : ""
+  }
+  }
+}`;
+  return await fusekiUpdate(query);
+}
+
 export function restore(turtleData: string) {
   return fusekiUpdate(`
 CLEAR GRAPH <http://3doc/meta>;
