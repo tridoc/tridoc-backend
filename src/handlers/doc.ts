@@ -63,11 +63,61 @@ export async function getPDF(
       },
     });
   } catch (error) {
-    if (!(error instanceof Deno.errors.NotFound)) {
+    if (error instanceof Deno.errors.NotFound) {
       return respond("404 Not Found", { status: 404 });
     }
     throw error;
   }
+}
+
+export async function getThumb(
+  _request: Request,
+  match: URLPatternResult,
+): Promise<Response> {
+  const id = match.pathname.groups.id;
+  const path = getPath(id);
+  const fileName = await metafinder.getBasicMeta(id).then((
+    { title, created },
+  ) => title || created || "document");
+  let thumb: Deno.FsFile;
+  try {
+    thumb = await Deno.open(path + ".png", { read: true });
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      try {
+        await Deno.stat(path); // Check if PDF exists → 404 otherwise
+        const p = Deno.run({
+          cmd: [
+            "convert",
+            "-thumbnail",
+            "300x",
+            "-alpha",
+            "remove",
+            `${path}[0]`,
+            `${path}.png`,
+          ],
+        });
+        const { success, code } = await p.status();
+        if (!success) throw new Error("convert failed with code " + code);
+        thumb = await Deno.open(path + ".png", { read: true });
+      } catch (error) {
+        if (error instanceof Deno.errors.NotFound) {
+          return respond("404 Not Found", { status: 404 });
+        }
+        throw error;
+      }
+    } else {
+      throw error;
+    }
+  }
+  // Build a readable stream so the file doesn't have to be fully loaded into memory while we send it
+  const readableStream = thumb.readable;
+  return respond(readableStream, {
+    headers: {
+      "content-disposition": `inline; filename="${encodeURI(fileName)}.png"`,
+      "content-type": "image/png",
+    },
+  });
 }
 
 export async function list(

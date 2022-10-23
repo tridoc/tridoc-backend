@@ -9,7 +9,7 @@ export async function deleteRdfFile(
   _match: URLPatternResult,
 ): Promise<Response> {
   await Deno.remove("rdf.ttl");
-  return respond("200: OK");
+  return respond(undefined, { status: 204 });
 }
 
 export async function putZip(
@@ -38,5 +38,5 @@ export async function putZip(
   const turtleData = decoder.decode(await Deno.readFile("rdf.ttl"));
   await Deno.remove("rdf.ttl");
   await restore(turtleData);
-  return respond("200: OK");
+  return respond(undefined, { status: 204 });
 }

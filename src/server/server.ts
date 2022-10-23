@@ -19,7 +19,7 @@ const handler = async (request: Request): Promise<Response> => {
         path,
         "→ 401: Not Authenticated",
       );
-      return respond("401: Not Authenticated", {
+      return respond("401 Not Authenticated", {
         status: 401,
         headers: { "WWW-Authenticate": "Basic" },
       });
@@ -38,7 +38,7 @@ const handler = async (request: Request): Promise<Response> => {
       path,
       "→ 404: Path not found",
     );
-    return respond("404: Path not found", { status: 404 });
+    return respond("404 Path not found", { status: 404 });
   } catch (error) {
     console.log(
       (new Date()).toISOString(),
@@ -47,7 +47,7 @@ const handler = async (request: Request): Promise<Response> => {
       "→ 500: ",
       error,
     );
-    return respond("500: " + error, { status: 500 });
+    return respond("500 " + error, { status: 500 });
   }
 };
 

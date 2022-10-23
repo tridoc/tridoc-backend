@@ -32,7 +32,7 @@ export const routes: {
     handler: notImplemented,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/thumb" }),
-    handler: notImplemented,
+    handler: doc.getThumb,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/title" }),
     handler: notImplemented,

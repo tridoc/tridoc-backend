@@ -31,7 +31,7 @@ export async function fusekiUpdate(query: string): Promise<void> {
     method: "POST",
     headers: {
       "Authorization": "Basic " + btoa("admin:pw123"),
-      "Content-Type": "application/sparql-query",
+      "Content-Type": "application/sparql-update",
     },
     body: query,
   }).then(async (response) => {
