@@ -33,13 +33,10 @@ export async function putZip(
   await request.body?.pipeTo(writableStream);
   const p = Deno.run({ cmd: ["unzip", zipPath] });
   const { success, code } = await p.status();
-  if (success) {
-    await Deno.remove(zipPath);
-    const turtleData = decoder.decode(await Deno.readFile("rdf.ttl"));
-    await Deno.remove("rdf.ttl");
-    await restore(turtleData);
-    return respond("200: OK");
-  } else {
-    throw new Error("unzip failed with code " + code);
-  }
+  if (!success) throw new Error("unzip failed with code " + code);
+  await Deno.remove(zipPath);
+  const turtleData = decoder.decode(await Deno.readFile("rdf.ttl"));
+  await Deno.remove("rdf.ttl");
+  await restore(turtleData);
+  return respond("200: OK");
 }

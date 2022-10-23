@@ -108,12 +108,12 @@ When getting a comment, a JSON array with objects of the following structure is 
 | Address                    | Method | Description                          | Request / Payload  | Response | Implemented in Version | deno? |
 | -                          | -      | -                                    | - | - | - | - |
 | `/count`                   | GET    | Count (matching) documents           | <sup>[1](#f1)</sup> <sup>[3](#f3)</sup> | Number | 1.1.0 | ✅ |
-| `/doc`                     | POST   | Add / Store Document                 | PDF<sup>[5](#f5)</sup> | - | 1.1.0 |
-| `/doc`                     | GET    | Get List of all (matching) documents | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> <sup>[3](#f3)</sup> | Array of objects with document identifiers and titles (where available) | 1.1.0 |
+| `/doc`                     | POST   | Add / Store Document                 | PDF<sup>[5](#f5)</sup> | - | 1.1.0 | ✅ |
+| `/doc`                     | GET    | Get List of all (matching) documents | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> <sup>[3](#f3)</sup> | Array of objects with document identifiers and titles (where available) | 1.1.0 | ✅ |
 | `/doc/{id}`                | GET    | Get this document                    | - | PDF | 1.1.0 | ✅ |
 | `/doc/{id}`                | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | - | - | 1.1.0 |
 | `/doc/{id}/comment`        | POST   | Add comment to document              | Comment object / See above | - | 1.2.0 |
-| `/doc/{id}/comment`        | GET    | Get comments                         | - | Array of comment objects | 1.2.0 |
+| `/doc/{id}/comment`        | GET    | Get comments                         | - | Array of comment objects | 1.2.0 | ✅ |
 | `/doc/{id}/tag`            | POST   | Add a tag to document                | Tag object / See above | - | 1.1.0 |
 | `/doc/{id}/tag`            | GET    | Get tags of document                 | - | Array of tag objects | 1.1.0 |
 | `/doc/{id}/tag/{tagLabel}` | DELETE | Remove tag from document             | - | - | 1.1.0 |

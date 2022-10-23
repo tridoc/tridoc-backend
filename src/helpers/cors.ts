@@ -5,7 +5,7 @@ export function respond(body?: BodyInit, init?: ResponseInit) {
       ...init?.headers,
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, PUT, DELETE, GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Authorization",
+      "Access-Control-Allow-Headers": "Authorization, Content-Type",
     },
   });
 }

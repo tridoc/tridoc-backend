@@ -34,4 +34,4 @@ services:
     #   - seccomp:unconfined
 
     # Overrides default command so things don't shut down after the process ends.
-    # command: "/bin/bash -c \"TRIDOC_PWD=\\\"pw123\\\" deno run --allow-net --allow-read=blobs --allow-write=blobs --allow-run=convert,pdfsandwich --allow-env=TRIDOC_PWD src/main.ts &\\\n sleep 5\\\n echo 'Attempting to create Dataset \\\"3DOC\\\"'\\\n curl 'http://fuseki:3030/$/datasets' -H \\\"Authorization: Basic $(echo -n admin:pw123 | base64)\\\" -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' --data 'dbName=3DOC&dbType=tdb'\\\n fg 1\\\n /bin/sh -c \\\"while sleep 1000; do :; done\\\"\""
+    # command: "/bin/bash -c \"TRIDOC_PWD=\\\"pw123\\\" deno run --allow-net --allow-read=blobs --allow-write=blobs --allow-run=convert,pdfsandwich --allow-env=TRIDOC_PWD,OCR_LANG src/main.ts &\\\n sleep 5\\\n echo 'Attempting to create Dataset \\\"3DOC\\\"'\\\n curl 'http://fuseki:3030/$/datasets' -H \\\"Authorization: Basic $(echo -n admin:pw123 | base64)\\\" -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' --data 'dbName=3DOC&dbType=tdb'\\\n fg 1\\\n /bin/sh -c \\\"while sleep 1000; do :; done\\\"\""
