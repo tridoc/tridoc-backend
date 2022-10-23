@@ -112,16 +112,16 @@ When getting a comment, a JSON array with objects of the following structure is 
 | `/doc`                     | GET    | Get List of all (matching) documents | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> <sup>[3](#f3)</sup> | Array of objects with document identifiers and titles (where available) | 1.1.0 | ✅ |
 | `/doc/{id}`                | GET    | Get this document                    | - | PDF | 1.1.0 | ✅ |
 | `/doc/{id}`                | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | - | - | 1.1.0 | ✅ |
-| `/doc/{id}/comment`        | POST   | Add comment to document              | Comment object / See above | - | 1.2.0 |
+| `/doc/{id}/comment`        | POST   | Add comment to document              | Comment object / See above | - | 1.2.0 | ✅ |
 | `/doc/{id}/comment`        | GET    | Get comments                         | - | Array of comment objects | 1.2.0 | ✅ |
 | `/doc/{id}/tag`            | POST   | Add a tag to document                | Tag object / See above | - | 1.1.0 |
-| `/doc/{id}/tag`            | GET    | Get tags of document                 | - | Array of tag objects | 1.1.0 |
+| `/doc/{id}/tag`            | GET    | Get tags of document                 | - | Array of tag objects | 1.1.0 | ✅ |
 | `/doc/{id}/tag/{tagLabel}` | DELETE | Remove tag from document             | - | - | 1.1.0 |
-| `/doc/{id}/thumb`          | GET    | Get document thumbnail               | - | PNG (300px wide) | 1.5.0 |
+| `/doc/{id}/thumb`          | GET    | Get document thumbnail               | - | PNG (300px wide) | 1.5.0 | ✅ |
 | `/doc/{id}/title`          | PUT    | Set document title                   | `{"title": "the_Title"}` | - | 1.1.0 |
-| `/doc/{id}/title`          | GET    | Get document title                   | - | `{"title": "the_Title"}` | 1.1.0 |
+| `/doc/{id}/title`          | GET    | Get document title                   | - | `{"title": "the_Title"}` | 1.1.0 | ✅ |
 | `/doc/{id}/title`          | DELETE | Reset document title                 | - | - | 1.1.0 |
-| `/doc/{id}/meta`           | GET    | Get various metadata                 | - | `{"title": "the_Title", "tags":[...], "comments": [...] ... }` | 1.1.0 \| .comments & .created in 1.2.1 |
+| `/doc/{id}/meta`           | GET    | Get various metadata                 | - | `{"title": "the_Title", "tags":[...], "comments": [...] ... }` | 1.1.0 \| .comments & .created in 1.2.1 | ✅ |
 | `/raw/rdf`                 | GET    | Get all metadata as RDF. Useful for Backups | <sup>[4](#f4)</sup> | RDF, Content-Type defined over request Headers or ?accept. Fallback to text/turtle. | 1.1.0 |
 | `/raw/rdf`                 | DELETE | "Cancel" failed zip upload—use only if certain it’s done & failed | | | (deno only) | ✅ |
 | `/raw/zip` or `/raw/tgz`   | GET    | Get all data. Useful for backups     | - | ZIP / TGZ containing blobs/ directory with all pdfs as stored within tridoc and a rdf.ttl file with all metadata. | 1.3.0 |

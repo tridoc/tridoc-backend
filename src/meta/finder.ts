@@ -188,6 +188,40 @@ WHERE {
   });
 }
 
+export async function getTags(id: string) {
+  const query = `
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX tridoc:  <http://vocab.tridoc.me/>
+PREFIX s: <http://schema.org/>
+SELECT DISTINCT ?label ?type ?v 
+ WHERE { 
+  GRAPH <http://3doc/meta> { 
+    <http://3doc/data/${id}> tridoc:tag ?tag . 
+    {
+      ?tag tridoc:label ?label . 
+    } 
+    UNION 
+    { 
+      ?tag tridoc:value ?v ; 
+        tridoc:parameterizableTag ?ptag . 
+      ?ptag tridoc:label ?label ; 
+        tridoc:valueType ?type . 
+    } 
+  }
+}`;
+  return await fusekiFetch(query).then((json) =>
+    json.results.bindings.map((binding) => {
+      return {
+        label: binding.label.value,
+        parameter: binding.type
+          ? { type: binding.type.value, value: binding.v.value }
+          : undefined,
+      };
+    })
+  );
+}
+
 export async function getTagTypes(labels: string[]) {
   const json = await fusekiFetch(`
 PREFIX tridoc: <http://vocab.tridoc.me/>

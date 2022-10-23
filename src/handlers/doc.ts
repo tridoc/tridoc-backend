@@ -70,6 +70,28 @@ export async function getPDF(
   }
 }
 
+export async function getMeta(
+  _request: Request,
+  match: URLPatternResult,
+): Promise<Response> {
+  const id = match.pathname.groups.id;
+  return respond(
+    JSON.stringify({
+      ...(await metafinder.getBasicMeta(id)),
+      comments: await metafinder.getComments(id),
+      tags: await metafinder.getTags(id),
+    }),
+  );
+}
+
+export async function getTags(
+  _request: Request,
+  match: URLPatternResult,
+): Promise<Response> {
+  const id = match.pathname.groups.id;
+  return respond(JSON.stringify(await metafinder.getTags(id)));
+}
+
 export async function getThumb(
   _request: Request,
   match: URLPatternResult,
@@ -142,7 +164,7 @@ export async function postComment(
   match: URLPatternResult,
 ): Promise<Response> {
   const id = match.pathname.groups.id;
-  await metastore.addComment(id, await request.text());
+  await metastore.addComment(id, (await request.json()).text);
   return respond(undefined, { status: 204 });
 }
 

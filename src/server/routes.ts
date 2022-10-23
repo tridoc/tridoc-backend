@@ -29,7 +29,7 @@ export const routes: {
     handler: doc.getComments,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/tag" }),
-    handler: notImplemented,
+    handler: doc.getTags,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/thumb" }),
     handler: doc.getThumb,
@@ -38,7 +38,7 @@ export const routes: {
     handler: doc.getTitle,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/meta" }),
-    handler: notImplemented,
+    handler: doc.getMeta,
   }, {
     pattern: new URLPattern({ pathname: "/raw/rdf" }),
     handler: notImplemented,
