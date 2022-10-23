@@ -1,5 +1,14 @@
 import { Params } from "../helpers/processParams.ts";
 
+type SparqlJson = {
+  head: {
+    vars: string[];
+  };
+  results: {
+    bindings: { [key: string]: { type: string; value: string } }[];
+  };
+};
+
 export async function getComments(id: string) {
   const query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -27,8 +36,8 @@ SELECT DISTINCT ?d ?t WHERE {
     } else {
       throw new Error("" + response);
     }
-  }).then((json) =>
-    json.results.bindings.map((binding: Record<string, { value: string }>) => {
+  }).then((json: SparqlJson) =>
+    json.results.bindings.map((binding) => {
       return { text: binding.t.value, created: binding.d.value };
     })
   );
@@ -109,22 +118,18 @@ export async function getDocumentList(
       "Content-Type": "application/sparql-query",
     },
     body: body,
-  }).then((response) => response.json()).then((json) =>
-    json.results.bindings.map(
-      (
-        binding: Record<string, { value: string }>,
-      ) => {
-        const result: Record<string, string> = {};
-        result.identifier = binding.identifier.value;
-        if (binding.title) {
-          result.title = binding.title.value;
-        }
-        if (binding.date) {
-          result.created = binding.date.value;
-        }
-        return result;
-      },
-    )
+  }).then((response) => response.json()).then((json: SparqlJson) =>
+    json.results.bindings.map((binding) => {
+      const result: Record<string, string> = {};
+      result.identifier = binding.identifier.value;
+      if (binding.title) {
+        result.title = binding.title.value;
+      }
+      if (binding.date) {
+        result.created = binding.date.value;
+      }
+      return result;
+    })
   );
 }
 
@@ -197,9 +202,32 @@ export async function getDocumentNumber(
           '") } UNION { ?s text:query (s:text "' + text + '")} } .\n'
         : "") +
       "}",
-  }).then((response) => response.json()).then((json) =>
-    json.results.bindings[0].count.value as number
+  }).then((response) => response.json()).then((json: SparqlJson) =>
+    parseInt(json.results.bindings[0].count.value, 10)
   );
+}
+
+export async function getBasicMeta(id: string) {
+  return await fetch("http://fuseki:3030/3DOC/query", {
+    method: "POST",
+    headers: {
+      "Authorization": "Basic " + btoa("admin:pw123"),
+      "Content-Type": "application/sparql-query",
+    },
+    body: "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+      "PREFIX s: <http://schema.org/>\n" +
+      "SELECT ?title ?date\n" +
+      "WHERE {\n" +
+      '  ?s s:identifier "' + id + '" .\n' +
+      "  ?s s:dateCreated ?date .\n" +
+      "  OPTIONAL { ?s s:name ?title . }\n" +
+      "}",
+  }).then((response) => response.json()).then((json: SparqlJson) => {
+    return {
+      title: json.results.bindings[0].title?.value,
+      created: json.results.bindings[0].date?.value,
+    };
+  });
 }
 
 export async function getTagTypes(labels: string[]): Promise<string[]> {

@@ -40,10 +40,18 @@ export async function getPDF(
   const id = match.pathname.groups.id;
   const path = getPath(id);
   try {
+    const fileName = await metafinder.getBasicMeta(id).then((
+      { title, created },
+    ) => title || created || "document");
     const file = await Deno.open(path, { read: true });
     // Build a readable stream so the file doesn't have to be fully loaded into memory while we send it
     const readableStream = file.readable;
-    return respond(readableStream);
+    return respond(readableStream, {
+      headers: {
+        "content-disposition": `inline; filename="${encodeURI(fileName)}.pdf"`,
+        "content-type": "application/pdf",
+      },
+    });
   } catch (error) {
     if (!(error instanceof Deno.errors.NotFound)) {
       return respond("404 Not Found", { status: 404 });
