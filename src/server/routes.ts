@@ -63,7 +63,7 @@ export const routes: {
     handler: doc.postPDF,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/comment" }),
-    handler: notImplemented,
+    handler: doc.postComment,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/tag" }),
     handler: notImplemented,

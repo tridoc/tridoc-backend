@@ -79,6 +79,15 @@ export async function list(
   return respond(JSON.stringify(response));
 }
 
+export async function postComment(
+  request: Request,
+  match: URLPatternResult,
+): Promise<Response> {
+  const id = match.pathname.groups.id;
+  await metastore.addComment(id, await request.text());
+  return respond(undefined, { status: 204 });
+}
+
 export async function postPDF(
   request: Request,
   _match: URLPatternResult,
