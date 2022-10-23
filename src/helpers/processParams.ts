@@ -19,6 +19,11 @@ type ParamTag = {
   maxIsExclusive?: boolean; //[5]
 };
 
+export type queryOverrides = {
+  tags?: string[][];
+  nottags?: string[][];
+};
+
 export type Params = {
   tags?: ParamTag[];
   nottags?: ParamTag[];
@@ -27,11 +32,16 @@ export type Params = {
   offset?: number;
 };
 
-export async function processParams(request: Request): Promise<Params> {
+export async function processParams(
+  request: Request,
+  queryOverrides?: queryOverrides,
+): Promise<Params> {
   const query = extractQuery(request);
   const result: Params = {};
   const tags = query.tag?.map((t) => t.split(";")) ?? [];
+  if (queryOverrides?.tags) tags.push(...queryOverrides.tags);
   const nottags = query.nottag?.map((t) => t.split(";")) ?? [];
+  if (queryOverrides?.nottags) tags.push(...queryOverrides.nottags);
   result.text = query.text?.[0];
   result.limit = parseInt(query.limit?.[0], 10) > 0
     ? parseInt(query.limit[0])

@@ -3,6 +3,7 @@ import { count } from "../handlers/count.ts";
 import * as doc from "../handlers/doc.ts";
 import { notImplemented } from "../handlers/notImplemented.ts";
 import * as raw from "../handlers/raw.ts";
+import * as tag from "../handlers/tag.ts";
 import { version } from "../handlers/version.ts";
 
 export const routes: {
@@ -50,10 +51,10 @@ export const routes: {
     handler: raw.getTGZ,
   }, {
     pattern: new URLPattern({ pathname: "/tag" }),
-    handler: notImplemented,
+    handler: tag.getTagList,
   }, {
     pattern: new URLPattern({ pathname: "/tag/:tagLabel" }),
-    handler: notImplemented,
+    handler: tag.getDocs,
   }, {
     pattern: new URLPattern({ pathname: "/version" }),
     handler: version,
