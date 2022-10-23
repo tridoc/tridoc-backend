@@ -1,3 +1,5 @@
+import { fusekiUpdate } from "./fusekiFetch.ts";
+
 function escapeLiteral(string: string) {
   return string.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(
     /\r/g,
@@ -6,18 +8,11 @@ function escapeLiteral(string: string) {
 }
 
 export function restore(turtleData: string) {
-  const statement = `CLEAR GRAPH <http://3doc/meta>;
-              INSERT DATA {
-                GRAPH <http://3doc/meta> { ${turtleData} }
-              }`;
-  return fetch("http://fuseki:3030/3DOC/update", {
-    method: "POST",
-    headers: {
-      "Authorization": "Basic " + btoa("admin:pw123"),
-      "Content-Type": "application/sparql-update",
-    },
-    body: statement,
-  });
+  return fusekiUpdate(`
+CLEAR GRAPH <http://3doc/meta>;
+INSERT DATA {
+   GRAPH <http://3doc/meta> { ${turtleData} }
+}`);
 }
 
 export async function storeDocument(
@@ -36,19 +31,5 @@ INSERT DATA {
     s:text "${escapeLiteral(text)}" .
   }
 }`;
-  return await fetch("http://fuseki:3030/3DOC/update", {
-    method: "POST",
-    headers: {
-      "Authorization": "Basic " + btoa("admin:pw123"),
-      "Content-Type": "application/sparql-update",
-    },
-    body: query,
-  }).then((response) => {
-    //console.log("Fuseki returned: "+response.status);
-    if (response.ok) {
-      return response;
-    } else {
-      throw new Error("Error from Fuseki: " + response.statusText);
-    }
-  });
+  return await fusekiUpdate(query);
 }

@@ -1,13 +1,5 @@
 import { Params } from "../helpers/processParams.ts";
-
-type SparqlJson = {
-  head: {
-    vars: string[];
-  };
-  results: {
-    bindings: { [key: string]: { type: string; value: string } }[];
-  };
-};
+import { fusekiFetch } from "./fusekiFetch.ts";
 
 export async function getComments(id: string) {
   const query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -23,20 +15,7 @@ SELECT DISTINCT ?d ?t WHERE {
       ] .
   }
 }`;
-  return await fetch("http://fuseki:3030/3DOC/query", {
-    method: "POST",
-    headers: {
-      "Authorization": "Basic " + btoa("admin:pw123"),
-      "Content-Type": "application/sparql-query",
-    },
-    body: query,
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error("" + response);
-    }
-  }).then((json: SparqlJson) =>
+  return await fusekiFetch(query).then((json) =>
     json.results.bindings.map((binding) => {
       return { text: binding.t.value, created: binding.d.value };
     })
@@ -111,14 +90,7 @@ export async function getDocumentList(
     "ORDER BY desc(?date)\n" +
     (limit ? "LIMIT " + limit + "\n" : "") +
     (offset ? "OFFSET " + offset : "");
-  return await fetch("http://fuseki:3030/3DOC/query", {
-    method: "POST",
-    headers: {
-      "Authorization": "Basic " + btoa("admin:pw123"),
-      "Content-Type": "application/sparql-query",
-    },
-    body: body,
-  }).then((response) => response.json()).then((json: SparqlJson) =>
+  return await fusekiFetch(body).then((json) =>
     json.results.bindings.map((binding) => {
       const result: Record<string, string> = {};
       result.identifier = binding.identifier.value;
@@ -183,46 +155,32 @@ export async function getDocumentNumber(
   ?tag${i} tridoc:label "${nottags[i].label}" . }`;
     }
   }
-  return await fetch("http://fuseki:3030/3DOC/query", {
-    method: "POST",
-    headers: {
-      "Authorization": "Basic " + btoa("admin:pw123"),
-      "Content-Type": "application/sparql-query",
-    },
-    body: "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-      "PREFIX s: <http://schema.org/>\n" +
-      "PREFIX tridoc:  <http://vocab.tridoc.me/>\n" +
-      "PREFIX text: <http://jena.apache.org/text#>\n" +
-      "SELECT (COUNT(DISTINCT ?s) as ?count)\n" +
-      "WHERE {\n" +
-      "  ?s s:identifier ?identifier .\n" +
-      tagQuery +
-      (text
-        ? '{ { ?s text:query (s:name "' + text +
-          '") } UNION { ?s text:query (s:text "' + text + '")} } .\n'
-        : "") +
-      "}",
-  }).then((response) => response.json()).then((json: SparqlJson) =>
-    parseInt(json.results.bindings[0].count.value, 10)
-  );
+  return await fusekiFetch(`
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s: <http://schema.org/>
+PREFIX tridoc:  <http://vocab.tridoc.me/>
+PREFIX text: <http://jena.apache.org/text#>
+SELECT (COUNT(DISTINCT ?s) as ?count)
+WHERE {
+  ?s s:identifier ?identifier .
+  ${tagQuery}
+  ${
+    text
+      ? `{ { ?s text:query (s:name "${text}") } UNION { ?s text:query (s:text "${text}")} } .\n`
+      : ""
+  }}`).then((json) => parseInt(json.results.bindings[0].count.value, 10));
 }
 
 export async function getBasicMeta(id: string) {
-  return await fetch("http://fuseki:3030/3DOC/query", {
-    method: "POST",
-    headers: {
-      "Authorization": "Basic " + btoa("admin:pw123"),
-      "Content-Type": "application/sparql-query",
-    },
-    body: "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-      "PREFIX s: <http://schema.org/>\n" +
-      "SELECT ?title ?date\n" +
-      "WHERE {\n" +
-      '  ?s s:identifier "' + id + '" .\n' +
-      "  ?s s:dateCreated ?date .\n" +
-      "  OPTIONAL { ?s s:name ?title . }\n" +
-      "}",
-  }).then((response) => response.json()).then((json: SparqlJson) => {
+  return await fusekiFetch(`
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s: <http://schema.org/>
+SELECT ?title ?date
+WHERE {
+  ?s s:identifier "${id}" .
+  ?s s:dateCreated ?date .
+  OPTIONAL { ?s s:name ?title . }
+}`).then((json) => {
     return {
       title: json.results.bindings[0]?.title?.value,
       created: json.results.bindings[0]?.date?.value,
@@ -230,21 +188,14 @@ export async function getBasicMeta(id: string) {
   });
 }
 
-export async function getTagTypes(labels: string[]): Promise<string[]> {
-  const response = await fetch("http://fuseki:3030/3DOC/query", {
-    method: "POST",
-    headers: {
-      "Authorization": "Basic " + btoa("admin:pw123"),
-      "Content-Type": "application/sparql-query",
-    },
-    body: `PREFIX tridoc: <http://vocab.tridoc.me/>
+export async function getTagTypes(labels: string[]) {
+  const json = await fusekiFetch(`
+PREFIX tridoc: <http://vocab.tridoc.me/>
 SELECT DISTINCT ?l ?t WHERE { VALUES ?l { "${
-      labels.join('" "')
-    }" } ?s tridoc:label ?l . OPTIONAL { ?s tridoc:valueType ?t . } }`,
-  });
-  const json = await response.json();
+    labels.join('" "')
+  }" } ?s tridoc:label ?l . OPTIONAL { ?s tridoc:valueType ?t . } }`);
   return json.results.bindings.map(
-    (binding: Record<string, { value: string }>) => {
+    (binding) => {
       const result_1 = [];
       result_1[0] = binding.l.value;
       if (binding.t) {
