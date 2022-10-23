@@ -7,6 +7,20 @@ type SparqlJson = {
   };
 };
 
+export function dump(accept = "text/turtle") {
+  const query = "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }";
+  console.log((new Date()).toISOString(), "→ FUSEKI QUERY", query, "\n");
+  return fetch("http://fuseki:3030/3DOC/query", {
+    method: "POST",
+    headers: {
+      "Authorization": "Basic " + btoa("admin:pw123"),
+      "Content-Type": "application/sparql-query",
+      "Accept": accept,
+    },
+    body: query,
+  });
+}
+
 export async function fusekiFetch(query: string): Promise<SparqlJson> {
   console.log((new Date()).toISOString(), "→ FUSEKI QUERY", query, "\n");
   return await fetch("http://fuseki:3030/3DOC/query", {

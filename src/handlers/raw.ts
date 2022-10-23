@@ -1,5 +1,6 @@
 import { emptyDir, writableStreamFromWriter } from "../deps.ts";
 import { respond } from "../helpers/cors.ts";
+import { dump } from "../meta/fusekiFetch.ts";
 import { restore } from "../meta/store.ts";
 
 const decoder = new TextDecoder("utf-8");
@@ -10,6 +11,17 @@ export async function deleteRdfFile(
 ): Promise<Response> {
   await Deno.remove("rdf.ttl");
   return respond(undefined, { status: 204 });
+}
+
+export async function getRdf(
+  request: Request,
+  _match: URLPatternResult,
+): Promise<Response> {
+  const url = new URL(request.url);
+  const accept = url.searchParams.has("accept")
+    ? decodeURIComponent(url.searchParams.get("accept")!)
+    : request.headers.get("Accept") || "text/turtle";
+  return await dump(accept);
 }
 
 export async function putZip(

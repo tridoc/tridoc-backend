@@ -41,7 +41,7 @@ export const routes: {
     handler: doc.getMeta,
   }, {
     pattern: new URLPattern({ pathname: "/raw/rdf" }),
-    handler: notImplemented,
+    handler: raw.getRdf,
   }, {
     pattern: new URLPattern({ pathname: "/raw/zip" }),
     handler: notImplemented,
