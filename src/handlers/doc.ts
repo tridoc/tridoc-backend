@@ -44,6 +44,17 @@ export async function deleteDoc(
   return respond(undefined, { status: 204 });
 }
 
+export async function deleteTag(
+  _request: Request,
+  match: URLPatternResult,
+) {
+  await metadelete.deleteTag(
+    decodeURIComponent(match.pathname.groups.tagLabel),
+    match.pathname.groups.id,
+  );
+  return respond(undefined, { status: 204 });
+}
+
 export async function getComments(
   _request: Request,
   match: URLPatternResult,

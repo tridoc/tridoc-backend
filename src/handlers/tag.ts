@@ -1,5 +1,6 @@
 import { respond } from "../helpers/cors.ts";
 import { processParams } from "../helpers/processParams.ts";
+import * as metadelete from "../meta/delete.ts";
 import * as metafinder from "../meta/finder.ts";
 import * as metastore from "../meta/store.ts";
 
@@ -32,6 +33,16 @@ export async function createTag(
     return respond("Label contains forbidden characters", { status: 400 });
   }
   await metastore.createTag(tagObject.label, tagObject.parameter?.type);
+  return respond(undefined, { status: 204 });
+}
+
+export async function deleteTag(
+  _request: Request,
+  match: URLPatternResult,
+) {
+  await metadelete.deleteTag(
+    decodeURIComponent(match.pathname.groups.tagLabel),
+  );
   return respond(undefined, { status: 204 });
 }
 

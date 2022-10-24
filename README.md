@@ -116,7 +116,7 @@ When getting a comment, a JSON array with objects of the following structure is 
 | `/doc/{id}/comment`        | GET    | Get comments                         | - | Array of comment objects | 1.2.0 | ✅ |
 | `/doc/{id}/tag`            | POST   | Add a tag to document                | Tag object / See above | - | 1.1.0 | ✅ |
 | `/doc/{id}/tag`            | GET    | Get tags of document                 | - | Array of tag objects | 1.1.0 | ✅ |
-| `/doc/{id}/tag/{tagLabel}` | DELETE | Remove tag from document             | - | - | 1.1.0 |
+| `/doc/{id}/tag/{tagLabel}` | DELETE | Remove tag from document             | - | - | 1.1.0 |✅ |
 | `/doc/{id}/thumb`          | GET    | Get document thumbnail               | - | PNG (300px wide) | 1.5.0 | ✅ |
 | `/doc/{id}/title`          | PUT    | Set document title                   | `{"title": "the_Title"}` | - | 1.1.0 | ✅ |
 | `/doc/{id}/title`          | GET    | Get document title                   | - | `{"title": "the_Title"}` | 1.1.0 | ✅ |
@@ -129,7 +129,7 @@ When getting a comment, a JSON array with objects of the following structure is 
 | `/tag`                     | POST   | Create new tag                       | See above | - | 1.1.0 | ✅ |
 | `/tag`                     | GET    | Get (list of) all tags               | - | - | 1.1.0 | ✅ |
 | `/tag/{tagLabel}`          | GET    | Get Documents with this tag. Same as `/doc?tag={tagLabel}` | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> | Array of objects with document identifiers and titles (where available) |  1.1.0 | ✅ |
-| `/tag/{tagLabel}`          | DELETE | Delete this tag                      | - | - | 1.1.0 |
+| `/tag/{tagLabel}`          | DELETE | Delete this tag                      | - | - | 1.1.0 | ✅ |
 | `/version`                 | GET    | Get tridoc version                   | - | semver version number | 1.1.0 | ✅ |
 
 #### URL-Parameters supported:

@@ -84,13 +84,13 @@ export const routes: {
     handler: doc.deleteDoc,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/tag/:tagLabel" }),
-    handler: notImplemented,
+    handler: doc.deleteTag,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/title" }),
     handler: notImplemented,
   }, {
     pattern: new URLPattern({ pathname: "/tag/:tagLabel" }),
-    handler: notImplemented,
+    handler: tag.deleteTag,
   }, {
     pattern: new URLPattern({ pathname: "/raw/rdf" }),
     handler: raw.deleteRDFFile,
