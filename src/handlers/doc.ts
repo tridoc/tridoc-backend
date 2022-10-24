@@ -188,7 +188,7 @@ export async function postComment(
 ): Promise<Response> {
   const id = match.pathname.groups.id;
   await metastore.addComment(id, (await request.json()).text);
-  return respond(undefined, { status: 204 });
+  return respond(undefined, { status: 201 });
 }
 
 export async function postPDF(
@@ -257,7 +257,7 @@ export async function postTag(
     return respond("No value provided", { status: 400 });
   }
   await metastore.addTag(id, tagObject.label, tagObject.parameter?.value, type);
-  return respond(undefined, { status: 204 });
+  return respond(undefined, { status: 201 });
 }
 
 export async function putTitle(
@@ -267,5 +267,5 @@ export async function putTitle(
   const id = match.pathname.groups.id;
   const title: string = (await request.json())?.title;
   await metastore.addTitle(id, title);
-  return respond(undefined, { status: 204 });
+  return respond(undefined, { status: 201 });
 }

@@ -1,16 +1,17 @@
 import { fusekiUpdate } from "./fusekiFetch.ts";
 
 export async function deleteTag(label: string, id?: string) {
-  await fusekiUpdate(`
+  await Promise.allSettled([
+    fusekiUpdate(`
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX s: <http://schema.org/>
 PREFIX tridoc: <http://vocab.tridoc.me/>
 WITH <http://3doc/meta>
 DELETE {
   ${
-    id ? `<http://3doc/data/${id}> tridoc:tag ?ptag + ` : `?ptag ?p ?o .
+      id ? `<http://3doc/data/${id}> tridoc:tag ?ptag + ` : `?ptag ?p ?o .
   ?s ?p1 ?ptag`
-  }
+    }
 }
 WHERE {
   ?ptag tridoc:parameterizableTag ?tag.
@@ -19,17 +20,17 @@ WHERE {
   OPTIONAL {
     ${id ? `<http://3doc/data/${id}> tridoc:tag ?ptag` : "?s ?p1 ?ptag"}
   }
-}`);
-  await fusekiUpdate(`
+}`),
+    fusekiUpdate(`
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX s: <http://schema.org/>
 PREFIX tridoc: <http://vocab.tridoc.me/>
 WITH <http://3doc/meta>
 DELETE {
   ${
-    id ? `<http://3doc/data/${id}> tridoc:tag ?tag` : `?tag ?p ?o .
+      id ? `<http://3doc/data/${id}> tridoc:tag ?tag` : `?tag ?p ?o .
   ?s ?p1 ?tag`
-  }
+    }
 }
 WHERE {
   ?tag tridoc:label "${label}" .
@@ -37,7 +38,8 @@ WHERE {
   OPTIONAL {
     ${id ? `<http://3doc/data/${id}> ?p1 ?tag` : "?s ?p1 ?tag"}
   }
-}`);
+}`),
+  ]);
 }
 
 export function deleteFile(id: string) {
