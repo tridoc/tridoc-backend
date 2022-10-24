@@ -157,7 +157,9 @@ export async function getTitle(
   match: URLPatternResult,
 ): Promise<Response> {
   const id = match.pathname.groups.id;
-  return respond((await metafinder.getBasicMeta(id)).title);
+  return respond(
+    JSON.stringify({ title: (await metafinder.getBasicMeta(id)).title }),
+  );
 }
 
 export async function list(
@@ -244,5 +246,15 @@ export async function postTag(
     return respond("No value provided", { status: 400 });
   }
   await metastore.addTag(id, tagObject.label, tagObject.parameter?.value, type);
+  return respond(undefined, { status: 204 });
+}
+
+export async function putTitle(
+  request: Request,
+  match: URLPatternResult,
+): Promise<Response> {
+  const id = match.pathname.groups.id;
+  const title: string = (await request.json())?.title;
+  await metastore.addTitle(id, title);
   return respond(undefined, { status: 204 });
 }

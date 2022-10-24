@@ -55,6 +55,17 @@ INSERT DATA {
   return await fusekiUpdate(query);
 }
 
+export async function addTitle(id: string, title: string) {
+  const query = `
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s: <http://schema.org/>
+WITH <http://3doc/meta>
+DELETE { <http://3doc/data/${id}> s:name ?o }
+INSERT { <http://3doc/data/${id}> s:name "${escapeLiteral(title)}" }
+WHERE { OPTIONAL { <http://3doc/data/${id}> s:name ?o } }`;
+  return await fusekiUpdate(query);
+}
+
 export function restore(turtleData: string) {
   return fusekiUpdate(`
 CLEAR GRAPH <http://3doc/meta>;

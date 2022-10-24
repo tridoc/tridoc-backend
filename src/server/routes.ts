@@ -74,7 +74,7 @@ export const routes: {
   }],
   "PUT": [{
     pattern: new URLPattern({ pathname: "/doc/:id/title" }),
-    handler: notImplemented,
+    handler: doc.putTitle,
   }, {
     pattern: new URLPattern({ pathname: "/raw/zip" }),
     handler: raw.putZIP,
