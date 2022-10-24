@@ -54,6 +54,14 @@ export async function deleteTag(
   );
   return respond(undefined, { status: 204 });
 }
+export async function deleteTitle(
+  request: Request,
+  match: URLPatternResult,
+): Promise<Response> {
+  const id = match.pathname.groups.id;
+  await metadelete.deleteTitle(id);
+  return respond(undefined, { status: 201 });
+}
 
 export async function getComments(
   _request: Request,

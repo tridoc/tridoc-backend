@@ -105,32 +105,32 @@ When getting a comment, a JSON array with objects of the following structure is 
 
 ## API
 
-| Address                    | Method | Description                          | Request / Payload  | Response | Implemented in Version | deno? |
+| Address                    | Method | Description                          | Request / Payload  | Response | Implemented in Version |
 | -                          | -      | -                                    | - | - | - | - |
-| `/count`                   | GET    | Count (matching) documents           | <sup>[1](#f1)</sup> <sup>[3](#f3)</sup> | Number | 1.1.0 | ✅ |
-| `/doc`                     | POST   | Add / Store Document                 | PDF<sup>[5](#f5)</sup> | - | 1.1.0 | ✅ |
-| `/doc`                     | GET    | Get List of all (matching) documents | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> <sup>[3](#f3)</sup> | Array of objects with document identifiers and titles (where available) | 1.1.0 | ✅ |
-| `/doc/{id}`                | GET    | Get this document                    | - | PDF | 1.1.0 | ✅ |
-| `/doc/{id}`                | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | - | - | 1.1.0 | ✅ |
-| `/doc/{id}/comment`        | POST   | Add comment to document              | Comment object / See above | - | 1.2.0 | ✅ |
-| `/doc/{id}/comment`        | GET    | Get comments                         | - | Array of comment objects | 1.2.0 | ✅ |
-| `/doc/{id}/tag`            | POST   | Add a tag to document                | Tag object / See above | - | 1.1.0 | ✅ |
-| `/doc/{id}/tag`            | GET    | Get tags of document                 | - | Array of tag objects | 1.1.0 | ✅ |
-| `/doc/{id}/tag/{tagLabel}` | DELETE | Remove tag from document             | - | - | 1.1.0 |✅ |
-| `/doc/{id}/thumb`          | GET    | Get document thumbnail               | - | PNG (300px wide) | 1.5.0 | ✅ |
-| `/doc/{id}/title`          | PUT    | Set document title                   | `{"title": "the_Title"}` | - | 1.1.0 | ✅ |
-| `/doc/{id}/title`          | GET    | Get document title                   | - | `{"title": "the_Title"}` | 1.1.0 | ✅ |
+| `/count`                   | GET    | Count (matching) documents           | <sup>[1](#f1)</sup> <sup>[3](#f3)</sup> | Number | 1.1.0 |
+| `/doc`                     | POST   | Add / Store Document                 | PDF<sup>[5](#f5)</sup> | - | 1.1.0 |
+| `/doc`                     | GET    | Get List of all (matching) documents | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> <sup>[3](#f3)</sup> | Array of objects with document identifiers and titles (where available) | 1.1.0 |
+| `/doc/{id}`                | GET    | Get this document                    | - | PDF | 1.1.0 |
+| `/doc/{id}`                | DELETE | Deletes all metadata associated with the document. Document will not be deleted and is stays accessible over /doc/{id}. | - | - | 1.1.0 |
+| `/doc/{id}/comment`        | POST   | Add comment to document              | Comment object / See above | - | 1.2.0 |
+| `/doc/{id}/comment`        | GET    | Get comments                         | - | Array of comment objects | 1.2.0 |
+| `/doc/{id}/tag`            | POST   | Add a tag to document                | Tag object / See above | - | 1.1.0 |
+| `/doc/{id}/tag`            | GET    | Get tags of document                 | - | Array of tag objects | 1.1.0 |
+| `/doc/{id}/tag/{tagLabel}` | DELETE | Remove tag from document             | - | - | 1.1.0 |
+| `/doc/{id}/thumb`          | GET    | Get document thumbnail               | - | PNG (300px wide) | 1.5.0 |
+| `/doc/{id}/title`          | PUT    | Set document title                   | `{"title": "the_Title"}` | - | 1.1.0 |
+| `/doc/{id}/title`          | GET    | Get document title                   | - | `{"title": "the_Title"}` | 1.1.0 |
 | `/doc/{id}/title`          | DELETE | Reset document title                 | - | - | 1.1.0 |
-| `/doc/{id}/meta`           | GET    | Get various metadata                 | - | `{"title": "the_Title", "tags":[...], "comments": [...] ... }` | 1.1.0 \| .comments & .created in 1.2.1 | ✅ |
-| `/raw/rdf`                 | GET    | Get all metadata as RDF. Useful for Backups | <sup>[4](#f4)</sup> | RDF, Content-Type defined over request Headers or ?accept. Fallback to text/turtle. | 1.1.0 | ✅ |
-| `/raw/rdf`                 | DELETE | "Cancel" failed zip upload—use only if certain it’s done & failed | | | (deno only) | ✅ |
-| `/raw/zip` or `/raw/tgz`   | GET    | Get all data. Useful for backups     | - | ZIP / TGZ containing blobs/ directory with all pdfs as stored within tridoc and a rdf.ttl file with all metadata. | 1.3.0 | ✅ |
-| `/raw/zip`                 | PUT    | Replace all data with backup zip     | ZIP | Replaces the metadata and adds the blobs from the zip | 1.3.0 | ✅ |
-| `/tag`                     | POST   | Create new tag                       | See above | - | 1.1.0 | ✅ |
-| `/tag`                     | GET    | Get (list of) all tags               | - | - | 1.1.0 | ✅ |
-| `/tag/{tagLabel}`          | GET    | Get Documents with this tag. Same as `/doc?tag={tagLabel}` | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> | Array of objects with document identifiers and titles (where available) |  1.1.0 | ✅ |
-| `/tag/{tagLabel}`          | DELETE | Delete this tag                      | - | - | 1.1.0 | ✅ |
-| `/version`                 | GET    | Get tridoc version                   | - | semver version number | 1.1.0 | ✅ |
+| `/doc/{id}/meta`           | GET    | Get various metadata                 | - | `{"title": "the_Title", "tags":[...], "comments": [...] ... }` | 1.1.0 \| .comments & .created in 1.2.1 |
+| `/raw/rdf`                 | GET    | Get all metadata as RDF. Useful for Backups | <sup>[4](#f4)</sup> | RDF, Content-Type defined over request Headers or ?accept. Fallback to text/turtle. | 1.1.0 |
+| `/raw/rdf`                 | DELETE | "Cancel" failed zip upload—use only if certain it’s done & failed | | | (deno only) |
+| `/raw/zip` or `/raw/tgz`   | GET    | Get all data. Useful for backups     | - | ZIP / TGZ containing blobs/ directory with all pdfs as stored within tridoc and a rdf.ttl file with all metadata. | 1.3.0 |
+| `/raw/zip`                 | PUT    | Replace all data with backup zip     | ZIP | Replaces the metadata and adds the blobs from the zip | 1.3.0 |
+| `/tag`                     | POST   | Create new tag                       | See above | - | 1.1.0 |
+| `/tag`                     | GET    | Get (list of) all tags               | - | - | 1.1.0 |
+| `/tag/{tagLabel}`          | GET    | Get Documents with this tag. Same as `/doc?tag={tagLabel}` | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> | Array of objects with document identifiers and titles (where available) |  1.1.0 |
+| `/tag/{tagLabel}`          | DELETE | Delete this tag                      | - | - | 1.1.0 |
+| `/version`                 | GET    | Get tridoc version                   | - | semver version number | 1.1.0 |
 
 #### URL-Parameters supported:
 

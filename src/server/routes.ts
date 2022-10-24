@@ -1,7 +1,6 @@
 import { options } from "../handlers/cors.ts";
 import { count } from "../handlers/count.ts";
 import * as doc from "../handlers/doc.ts";
-import { notImplemented } from "../handlers/notImplemented.ts";
 import * as raw from "../handlers/raw.ts";
 import * as tag from "../handlers/tag.ts";
 import { version } from "../handlers/version.ts";
@@ -87,7 +86,7 @@ export const routes: {
     handler: doc.deleteTag,
   }, {
     pattern: new URLPattern({ pathname: "/doc/:id/title" }),
-    handler: notImplemented,
+    handler: doc.deleteTitle,
   }, {
     pattern: new URLPattern({ pathname: "/tag/:tagLabel" }),
     handler: tag.deleteTag,

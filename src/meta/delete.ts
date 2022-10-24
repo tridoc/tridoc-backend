@@ -1,5 +1,12 @@
 import { fusekiUpdate } from "./fusekiFetch.ts";
 
+export function deleteFile(id: string) {
+  return fusekiUpdate(`
+WITH <http://3doc/meta>
+DELETE { <http://3doc/data/${id}> ?p ?o }
+WHERE { <http://3doc/data/${id}> ?p ?o }`);
+}
+
 export async function deleteTag(label: string, id?: string) {
   await Promise.allSettled([
     fusekiUpdate(`
@@ -42,9 +49,10 @@ WHERE {
   ]);
 }
 
-export function deleteFile(id: string) {
+export function deleteTitle(id: string) {
   return fusekiUpdate(`
+PREFIX s: <http://schema.org/>
 WITH <http://3doc/meta>
-DELETE { <http://3doc/data/${id}> ?p ?o }
-WHERE { <http://3doc/data/${id}> ?p ?o }`);
+DELETE { <http://3doc/data/${id}> s:name ?o }
+WHERE { <http://3doc/data/${id}> s:name ?o }`);
 }
