@@ -70,7 +70,7 @@ export const routes: {
     handler: doc.postTag,
   }, {
     pattern: new URLPattern({ pathname: "/tag" }),
-    handler: notImplemented,
+    handler: tag.createTag,
   }],
   "PUT": [{
     pattern: new URLPattern({ pathname: "/doc/:id/title" }),
