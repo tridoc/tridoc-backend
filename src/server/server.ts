@@ -40,6 +40,10 @@ const handler = async (request: Request): Promise<Response> => {
     );
     return respond("404 Path not found", { status: 404 });
   } catch (error) {
+    let message;
+    if (error instanceof Deno.errors.PermissionDenied) {
+      message = "Got “Permission Denied” trying to access the file on disk.\n\n    Please run ```docker exec -u 0 [name of backend-container] chmod -R a+r ./blobs/ rdf.ttl``` on the host server to fix this and similar issues for the future."
+    }
     console.log(
       (new Date()).toISOString(),
       request.method,
@@ -47,7 +51,7 @@ const handler = async (request: Request): Promise<Response> => {
       "→ 500: ",
       error,
     );
-    return respond("500 " + error, { status: 500 });
+    return respond("500 " + (message || error), { status: 500 });
   }
 };
 
