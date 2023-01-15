@@ -23,7 +23,9 @@ export async function createTag(
     tagObject?.parameter &&
     tagObject.parameter.type !== "http://www.w3.org/2001/XMLSchema#decimal" &&
     tagObject.parameter.type !== "http://www.w3.org/2001/XMLSchema#date"
-  ) return respond("Invalid type", { status: 400 });
+  ) {
+    return respond("Invalid type", { status: 400 });
+  }
   const tagList = await metafinder.getTagList();
   if (tagList.some((e) => e.label === tagObject.label)) {
     return respond("Tag already exists", { status: 400 });
@@ -54,12 +56,20 @@ export async function getDocs(
     tags: [[match.pathname.groups.tagLabel]],
   });
   const response = await metafinder.getDocumentList(params);
-  return respond(JSON.stringify(response));
+  return respond(JSON.stringify(response), {
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+    },
+  });
 }
 
 export async function getTagList(
   _request: Request,
   _match: URLPatternResult,
 ): Promise<Response> {
-  return respond(JSON.stringify(await metafinder.getTagList()));
+  return respond(JSON.stringify(await metafinder.getTagList()), {
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+    },
+  });
 }

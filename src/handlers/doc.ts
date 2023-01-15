@@ -69,7 +69,11 @@ export async function getComments(
 ): Promise<Response> {
   const id = match.pathname.groups.id;
   const response = await metafinder.getComments(id);
-  return respond(JSON.stringify(response));
+  return respond(JSON.stringify(response), {
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+    },
+  });
 }
 
 export async function getPDF(
@@ -110,6 +114,11 @@ export async function getMeta(
       comments: await metafinder.getComments(id),
       tags: await metafinder.getTags(id),
     }),
+    {
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+      },
+    },
   );
 }
 
@@ -118,7 +127,11 @@ export async function getTags(
   match: URLPatternResult,
 ): Promise<Response> {
   const id = match.pathname.groups.id;
-  return respond(JSON.stringify(await metafinder.getTags(id)));
+  return respond(JSON.stringify(await metafinder.getTags(id)), {
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+    },
+  });
 }
 
 export async function getThumb(
@@ -178,6 +191,11 @@ export async function getTitle(
   const id = match.pathname.groups.id;
   return respond(
     JSON.stringify({ title: (await metafinder.getBasicMeta(id)).title }),
+    {
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+      },
+    },
   );
 }
 
@@ -187,7 +205,11 @@ export async function list(
 ): Promise<Response> {
   const params = await processParams(request);
   const response = await metafinder.getDocumentList(params);
-  return respond(JSON.stringify(response));
+  return respond(JSON.stringify(response), {
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+    },
+  });
 }
 
 export async function postComment(

@@ -48,7 +48,7 @@ const handler = async (request: Request): Promise<Response> => {
       (new Date()).toISOString(),
       request.method,
       path,
-      "→ 500: ",
+      "→ 500:",
       error,
     );
     return respond("500 " + (message || error), { status: 500 });
