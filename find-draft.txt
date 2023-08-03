@@ -1,2 +1,0 @@
-Encode where necessary: GET /doc?tag=pay&tag=prority(>3)&tag=not(personal)&search=helsinki
-                            /doc?tag=pay&tag=prority(>3)&nottag=personal&text=helsinki

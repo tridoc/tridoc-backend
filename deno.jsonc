@@ -1,0 +1,12 @@
+{
+  "fmt": {
+    "files": {
+      "include": ["src/"]
+    }
+  },
+  "tasks": {
+    // --allow-run=convert,pdfsandwich,pdftotext,tar,zip,unzip,bash
+    "run": "deno run --allow-net --allow-read=blobs,rdf.ttl --allow-write=blobs,rdf.ttls --allow-run --allow-env=TRIDOC_PWD,OCR_LANG src/main.ts",
+    "run-watch": "deno run --watch --allow-net --allow-read=blobs,rdf.ttl --allow-write=blobs,rdf.ttl --allow-run --allow-env=TRIDOC_PWD,OCR_LANG src/main.ts"
+  }
+}
