@@ -24,11 +24,11 @@ RUN chown -R deno:deno /usr/src/app \
 # Switch to deno user before creating files
 USER deno
 
-# (Optional) set DENO_DIR explicitly
-ENV DENO_DIR=/deno-dir
+# Use a workspace-local Deno cache to avoid UID mismatch issues with /deno-dir
+ENV DENO_DIR=/usr/src/app/.deno-dir
 
-# Pre-cache dependencies (will be overridden by volume mount in dev)
-RUN mkdir -p src && echo 'export {};' > src/deps.ts
+# Pre-cache dependencies (will be overridden by volume mount in dev) and ensure cache dir exists
+RUN mkdir -p "$DENO_DIR" src && echo 'export {};' > src/deps.ts
 
 # Persist bash history in the mounted workspace so it survives container rebuilds
 # Use a file inside .devcontainer to keep project root clean
