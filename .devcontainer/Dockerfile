@@ -10,9 +10,13 @@ RUN apt update \
     && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra curl git zip unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Remove ImageMagick policy restrictions
+# Remove ImageMagick policy restrictions (only if file exists)
 RUN rm -f /etc/ImageMagick-6/policy.xml
 
+# Change ownership of the working directory to deno user
+RUN chown -R deno:deno /usr/src/app
+
+# Switch to deno user before creating files
 USER deno
 
 # Pre-cache dependencies (will be overridden by volume mount in dev)
