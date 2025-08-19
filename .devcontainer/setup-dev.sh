@@ -3,13 +3,23 @@
 echo "Setting up Tridoc Backend development environment..."
 
 # Wait for Fuseki to be ready
-echo "Waiting for Fuseki to start..."
-until curl -s http://fuseki:3030/$/ping > /dev/null; do
-    echo "Waiting for Fuseki..."
-    sleep 2
+echo "Waiting for Fuseki to start (timeout 180s)..."
+FUSEKI_TIMEOUT=180
+FUSEKI_START=$(date +%s)
+while true; do
+    if curl -fsS http://fuseki:3030/$/ping > /dev/null 2>&1; then
+        echo "Fuseki is ready!"
+        break
+    fi
+    NOW=$(date +%s)
+    ELAPSED=$((NOW - FUSEKI_START))
+    if [ "$ELAPSED" -ge "$FUSEKI_TIMEOUT" ]; then
+        echo "ERROR: Fuseki did not become ready within ${FUSEKI_TIMEOUT}s. Skipping dataset bootstrap. Check 'fuseki' service logs." >&2
+        break
+    fi
+    echo "Waiting for Fuseki (${ELAPSED}s elapsed)..."
+    sleep 3
 done
-
-echo "Fuseki is ready!"
 
 # Cache Deno dependencies if deps.ts exists
 if [ -f "src/deps.ts" ]; then
@@ -17,14 +27,24 @@ if [ -f "src/deps.ts" ]; then
     deno cache src/deps.ts
 fi
 
-# Create the 3DOC dataset in Fuseki
-echo "Creating Dataset '3DOC' in Fuseki..."
-curl 'http://fuseki:3030/$/datasets' \
-    -H "Authorization: Basic $(echo -n admin:${TRIDOC_PWD:-pw123} | base64)" \
-    -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
-    --data 'dbName=3DOC&dbType=tdb' \
-    --max-time 10 \
-    --retry 3
+if curl -fsS http://fuseki:3030/$/ping > /dev/null 2>&1; then
+    AUTH_HEADER="Authorization: Basic $(echo -n admin:${TRIDOC_PWD:-pw123} | base64)"
+    echo "Ensuring Dataset '3DOC' exists..."
+    if curl -fsS -H "$AUTH_HEADER" http://fuseki:3030/$/datasets | grep -q '"3DOC"'; then
+        echo "Dataset '3DOC' already exists."
+    else
+        if curl -fsS 'http://fuseki:3030/$/datasets' \
+            -H "$AUTH_HEADER" \
+            -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+            --data 'dbName=3DOC&dbType=tdb' ; then
+            echo "Dataset '3DOC' created."
+        else
+            echo "WARNING: Failed to create dataset '3DOC'. It may already exist or Fuseki refused the request." >&2
+        fi
+    fi
+else
+    echo "Skipping dataset creation because Fuseki is not reachable."
+fi
 
 echo "Development environment setup complete!"
 echo ""

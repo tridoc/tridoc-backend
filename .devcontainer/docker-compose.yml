@@ -15,7 +15,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - fuseki
+      fuseki:
+        condition: service_healthy
     environment:
       TRIDOC_PWD: "${TRIDOC_PWD:-pw123}"
       OCR_LANG: "${OCR_LANG:-deu}"
@@ -34,6 +35,12 @@ services:
     volumes:
       - ../fuseki-base:/fuseki/base
       - ../config-tdb.ttl:/fuseki/set-up-resources/config-tdb
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3030/$/ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
     networks:
       - tridoc-dev
 

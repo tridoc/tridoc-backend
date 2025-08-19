@@ -14,7 +14,9 @@ RUN apt update \
 RUN rm -f /etc/ImageMagick-6/policy.xml
 
 # Change ownership of the working directory to deno user
-RUN chown -R deno:deno /usr/src/app
+RUN chown -R deno:deno /usr/src/app \
+    && mkdir -p /home/deno \
+    && chown -R deno:deno /home/deno
 
 # Switch to deno user before creating files
 USER deno
