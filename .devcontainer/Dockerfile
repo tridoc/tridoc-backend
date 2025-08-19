@@ -2,19 +2,22 @@ FROM denoland/deno:2.4.4
 
 EXPOSE 8000
 
-RUN mkdir -p /home/deno
-RUN chown -R deno /home/deno
 RUN mkdir -p /usr/src/app/src
 WORKDIR /usr/src/app
 
+# Install required packages for development environment
 RUN apt update \
-    && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra curl git zip unzip
-RUN rm /etc/ImageMagick-6/policy.xml
+    && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra curl git zip unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Remove ImageMagick policy restrictions
+RUN rm -f /etc/ImageMagick-6/policy.xml
 
 USER deno
-COPY src/deps.ts src/deps.ts
-RUN deno cache src/deps.ts
 
-COPY . .
+# Pre-cache dependencies (will be overridden by volume mount in dev)
+# This is just to prepare the environment
+RUN mkdir -p src && echo 'export {};' > src/deps.ts
 
-CMD [ "/bin/bash", "/usr/src/app/.devcontainer/docker-cmd.sh" ]
+# Keep container running for development
+CMD ["sleep", "infinity"]

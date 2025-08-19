@@ -2,17 +2,14 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/docker-existing-docker-compose
 // If you want to run as a non-root user in the container, see .devcontainer/docker-compose.yml.
 {
-	"name": "Existing Docker Compose (Extend)",
+	"name": "Tridoc Backend Development",
 
-	// Update the 'dockerComposeFile' list if you have more compose files or use different names.
-	// The .devcontainer/docker-compose.yml file contains any overrides you need/want to make.
-	"dockerComposeFile": [
-		"../dev-docker-compose.yml",
-		"docker-compose.yml"
-	],
+	// Use the independent dev container docker-compose configuration
+	"dockerComposeFile": "docker-compose.yml",
 
 	"containerEnv": {
-    "TRIDOC_PWD": "pw123",
+		"TRIDOC_PWD": "pw123",
+		"OCR_LANG": "deu"
 	},
 
 	// The 'service' property is the name of the service for the container that VS Code should
@@ -24,24 +21,29 @@
 	"workspaceFolder": "/usr/src/app",
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	"forwardPorts": [8000, 8001],
 
-	// Uncomment the next line if you want start specific services in your Docker Compose config.
-	"runServices": [ "fuseki" ],
+	// Start the fuseki service when the dev container starts
+	"runServices": ["fuseki"],
 
 	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
-	// "shutdownAction": "none",
+	"shutdownAction": "stopCompose",
 
-	// Uncomment the next line to run commands after the container is created - for example installing curl.
-	// "postCreateCommand": "apt-get update && apt-get install -y curl",
+	// Post-create command to set up the development environment
+	"postCreateCommand": "bash .devcontainer/setup-dev.sh",
 
-	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
+	// Connect as the deno user
 	"remoteUser": "deno",
+	
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"denoland.vscode-deno"
-			]
+			],
+			"settings": {
+				"deno.enable": true,
+				"deno.lint": true
+			}
 		}
 	}
 }

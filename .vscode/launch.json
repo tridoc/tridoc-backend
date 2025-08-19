@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Tridoc Backend",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/main.ts",
+            "runtimeExecutable": "deno",
+            "runtimeArgs": [
+                "run",
+                "--watch",
+                "--allow-net",
+                "--allow-read=blobs,rdf.ttl",
+                "--allow-write=blobs,rdf.ttl",
+                "--allow-run",
+                "--allow-env=TRIDOC_PWD,OCR_LANG"
+            ],
+            "attachSimplePort": 9229,
+            "env": {
+                "TRIDOC_PWD": "pw123",
+                "OCR_LANG": "deu"
+            },
+            "console": "integratedTerminal"
+        }
+    ]
+}
