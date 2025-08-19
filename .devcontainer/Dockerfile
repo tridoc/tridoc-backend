@@ -2,7 +2,7 @@ FROM denoland/deno:2.4.4
 
 EXPOSE 8000
 
-RUN mkdir -p /usr/src/app/src
+RUN mkdir -p /usr/src/app/src /usr/src/app/.devcontainer
 WORKDIR /usr/src/app
 
 # Install required packages for development environment
