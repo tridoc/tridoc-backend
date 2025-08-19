@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 
 # Install required packages for development environment
 RUN apt update \
-    && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra curl git zip unzip \
+    && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra curl git zip unzip iputils-ping \
     && rm -rf /var/lib/apt/lists/*
 
 # Remove ImageMagick policy restrictions (only if file exists)
