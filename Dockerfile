@@ -1,4 +1,4 @@
-FROM denoland/deno:1.26.2
+FROM denoland/deno:2.4.4
 
 EXPOSE 8000
 
@@ -7,7 +7,6 @@ WORKDIR /usr/src/app
 
 RUN apt update \
     && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra curl zip unzip
-RUN rm /etc/ImageMagick-6/policy.xml
 
 USER deno
 COPY src/deps.ts src/deps.ts
