@@ -7,3 +7,5 @@ yarn-error.log*
 node_modules
 blobs
 fuseki-base
+.devcontainer/.bash_history
+.bash_history

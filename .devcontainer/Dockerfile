@@ -30,5 +30,13 @@ ENV DENO_DIR=/deno-dir
 # Pre-cache dependencies (will be overridden by volume mount in dev)
 RUN mkdir -p src && echo 'export {};' > src/deps.ts
 
+# Persist bash history in the mounted workspace so it survives container rebuilds
+# Use a file inside .devcontainer to keep project root clean
+ENV HISTFILE=/usr/src/app/.devcontainer/.bash_history \
+    HISTSIZE=5000 \
+    HISTFILESIZE=10000 \
+    PROMPT_COMMAND='history -a; history -n; $PROMPT_COMMAND'
+RUN touch /usr/src/app/.devcontainer/.bash_history && chmod 600 /usr/src/app/.devcontainer/.bash_history
+
 # Keep container running for development
 CMD ["sleep", "infinity"]
