@@ -217,8 +217,17 @@ export async function postComment(
   match: URLPatternResult,
 ): Promise<Response> {
   const id = match.pathname.groups.id;
-  await metastore.addComment(id, (await request.json()).text);
-  return respond(undefined, { status: 201 });
+  const body = await request.json();
+  if (!body || typeof body.text !== "string" || body.text.trim() === "") {
+    return respond("Missing or invalid 'text' in request body", { status: 400 });
+  }
+  const text: string = body.text;
+  const created = await metastore.addComment(id, text);
+  const respBody = JSON.stringify({ text, created });
+  return respond(respBody, {
+    status: 200,
+    headers: { "content-type": "application/json; charset=utf-8" },
+  });
 }
 
 export async function postPDF(
@@ -295,7 +304,11 @@ export async function putTitle(
   match: URLPatternResult,
 ): Promise<Response> {
   const id = match.pathname.groups.id;
-  const title: string = (await request.json())?.title;
+  const body = await request.json();
+  if (!body || typeof body.title !== "string" || body.title.trim() === "") {
+    return respond("Missing or invalid 'title' in request body", { status: 400 });
+  }
+  const title: string = body.title;
   await metastore.addTitle(id, title);
   return respond(undefined, { status: 201 });
 }

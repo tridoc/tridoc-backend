@@ -9,6 +9,7 @@ function escapeLiteral(string: string) {
 
 export async function addComment(id: string, text: string) {
   const now = new Date();
+  const created = now.toISOString();
   const query = `
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -18,18 +19,19 @@ INSERT DATA {
     GRAPH <http://3doc/meta> {
         <http://3doc/data/${id}> s:comment [
             a s:Comment ;
-            s:dateCreated "${now.toISOString()}"^^xsd:dateTime ;
+            s:dateCreated "${created}"^^xsd:dateTime ;
             s:text "${escapeLiteral(text)}"
         ] .
     }
 }`;
-  return await fusekiUpdate(query);
+  await fusekiUpdate(query);
+  return created;
 }
 
 export async function addTag(
   id: string,
   label: string,
-  value: string,
+  value: string | undefined,
   type: string,
 ) {
   const tag = value
