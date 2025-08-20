@@ -5,7 +5,7 @@ services:
   tridoc:
     build:
       context: ..
-      dockerfile: .devcontainer/Dockerfile
+      dockerfile: Dockerfile
     user: deno
     volumes:
       # Mount the entire workspace for development
@@ -29,7 +29,7 @@ services:
   fuseki:
     image: "linkedsolutions/fuseki"
     environment:
-      ADMIN_PASSWORD: "${TRIDOC_PWD:-pw123}"
+      ADMIN_PASSWORD: "${FUSEKI_PWD:-pw123}"
     ports:
       - "8001:3030" # Expose for development access
     volumes:
