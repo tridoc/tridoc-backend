@@ -55,7 +55,7 @@ export async function deleteTag(
   return respond(undefined, { status: 204 });
 }
 export async function deleteTitle(
-  request: Request,
+  _request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
   const id = match.pathname.groups.id;
@@ -67,7 +67,7 @@ export async function getComments(
   _request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
-  const id = match.pathname.groups.id;
+  const id = match.pathname.groups.id!;
   const response = await metafinder.getComments(id);
   return respond(JSON.stringify(response), {
     headers: {
@@ -80,7 +80,7 @@ export async function getPDF(
   _request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
-  const id = match.pathname.groups.id;
+  const id = match.pathname.groups.id!;
   const path = getPath(id);
   try {
     const fileName = await metafinder.getBasicMeta(id).then((
@@ -107,7 +107,7 @@ export async function getMeta(
   _request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
-  const id = match.pathname.groups.id;
+  const id = match.pathname.groups.id!;
   return respond(
     JSON.stringify({
       ...(await metafinder.getBasicMeta(id)),
@@ -126,7 +126,7 @@ export async function getTags(
   _request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
-  const id = match.pathname.groups.id;
+  const id = match.pathname.groups.id!;
   return respond(JSON.stringify(await metafinder.getTags(id)), {
     headers: {
       "content-type": "application/json; charset=utf-8",
@@ -138,7 +138,7 @@ export async function getThumb(
   _request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
-  const id = match.pathname.groups.id;
+  const id = match.pathname.groups.id!;
   const path = getPath(id);
   const fileName = await metafinder.getBasicMeta(id).then((
     { title, created },
@@ -148,23 +148,16 @@ export async function getThumb(
     thumb = await Deno.open(path + ".png", { read: true });
   } catch (error) {
     if (error instanceof Deno.errors.NotFound) {
-      try {
-        await Deno.stat(path); // Check if PDF exists → 404 otherwise
-        const p = Deno.run({
-          cmd: [
-            "convert",
-            "-thumbnail",
-            "300x",
-            "-alpha",
-            "remove",
-            `${path}[0]`,
-            `${path}.png`,
-          ],
-        });
-        const { success, code } = await p.status();
-        if (!success) throw new Error("convert failed with code " + code);
-        thumb = await Deno.open(path + ".png", { read: true });
-      } catch (error) {
+        try {
+          await Deno.stat(path); // Check if PDF exists → 404 otherwise
+          const cmd = new Deno.Command("convert", {
+            args: ["-thumbnail", "300x", "-alpha", "remove", `${path}[0]`, `${path}.png`],
+          });
+          const p = cmd.spawn();
+          const status = await p.status;
+          if (!status.success) throw new Error("convert failed with code " + status.code);
+          thumb = await Deno.open(path + ".png", { read: true });
+        } catch (error) {
         if (error instanceof Deno.errors.NotFound) {
           return respond("404 Not Found", { status: 404 });
         }
@@ -189,14 +182,12 @@ export async function getTitle(
   match: URLPatternResult,
 ): Promise<Response> {
   const id = match.pathname.groups.id;
-  return respond(
-    JSON.stringify({ title: (await metafinder.getBasicMeta(id)).title }),
-    {
-      headers: {
-        "content-type": "application/json; charset=utf-8",
-      },
+  const meta = await metafinder.getBasicMeta(id);
+  return respond(JSON.stringify({ title: meta.title ?? null }), {
+    headers: {
+      "content-type": "application/json; charset=utf-8",
     },
-  );
+  });
 }
 
 export async function list(
@@ -246,26 +237,25 @@ export async function postPDF(
   if (text.length < 4) {
     // run OCR
     const lang = Deno.env.get("OCR_LANG") || "fra+deu+eng";
-    const p = Deno.run({ cmd: ["pdfsandwich", "-rgb", "-lang", lang, path] });
-    const { success, code } = await p.status();
-    if (!success) throw new Error("pdfsandwich failed with code " + code);
+  const cmd = new Deno.Command("pdfsandwich", { args: ["-rgb", "-lang", lang, path] });
+  const p = cmd.spawn();
+  const status = await p.status;
+  if (!status.success) throw new Error("pdfsandwich failed with code " + status.code);
     // pdfsandwich generates a file with the same name + _ocr
     await Deno.rename(path + "_ocr", path);
     text = await getText(path);
     console.log((new Date()).toISOString(), id, ": OCR finished");
   }
   // no await as we don’t care for the result - if it fails, the thumbnail will be created upon request.
-  Deno.run({
-    cmd: [
-      "convert",
-      "-thumbnail",
-      "300x",
-      "-alpha",
-      "remove",
-      `${path}[0]`,
-      `${path}.png`,
-    ],
-  });
+  // Fire-and-forget thumbnail generation (non-blocking)
+  try {
+    const cmd = new Deno.Command("convert", {
+      args: ["-thumbnail", "300x", "-alpha", "remove", `${path}[0]`, `${path}.png`],
+    });
+    cmd.spawn();
+  } catch (_) {
+    // ignore spawn errors for background thumbnail creation
+  }
   const date = datecheck(request);
   await metastore.storeDocument({ id, text, date });
   return respond(undefined, {
