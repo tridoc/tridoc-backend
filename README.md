@@ -123,7 +123,7 @@ When getting a comment, a JSON array with objects of the following structure is 
 | `/doc/{id}/title`          | DELETE | Reset document title                 | - | - | 1.1.0 |
 | `/doc/{id}/meta`           | GET    | Get various metadata                 | - | `{"title": "the_Title", "tags":[...], "comments": [...] ... }` | 1.1.0 \| .comments & .created in 1.2.1 |
 | `/raw/rdf`                 | GET    | Get all metadata as RDF. Useful for Backups | <sup>[4](#f4)</sup> | RDF, Content-Type defined over request Headers or ?accept. Fallback to text/turtle. | 1.1.0 |
-| `/raw/rdf`                 | DELETE | "Cancel" failed zip upload—use only if certain it’s done & failed | | | (deno only) |
+| `/raw/rdf`                 | DELETE | Remove the temporary `rdf.ttl` file created during a backup upload (cancels a failed zip upload). Note: this does NOT delete stored metadata — `GET /raw/rdf` will continue to return the RDF data; use only if you are sure no upload is in progress. | - | 204 No Content | WIP |
 | `/raw/zip` or `/raw/tgz`   | GET    | Get all data. Useful for backups     | - | ZIP / TGZ containing blobs/ directory with all pdfs as stored within tridoc and a rdf.ttl file with all metadata. | 1.3.0 |
 | `/raw/zip`                 | PUT    | Replace all data with backup zip     | ZIP | Replaces the metadata and adds the blobs from the zip | 1.3.0 |
 | `/tag`                     | POST   | Create new tag                       | See above | - | 1.1.0 |
