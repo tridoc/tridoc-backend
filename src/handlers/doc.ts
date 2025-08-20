@@ -217,6 +217,7 @@ export async function postComment(
   match: URLPatternResult,
 ): Promise<Response> {
   const id = match.pathname.groups.id;
+  if (!id) return respond("Missing document id in path", { status: 400 });
   const body = await request.json();
   if (!body || typeof body.text !== "string" || body.text.trim() === "") {
     return respond("Missing or invalid 'text' in request body", { status: 400 });
@@ -280,6 +281,7 @@ export async function postTag(
   match: URLPatternResult,
 ): Promise<Response> {
   const id = match.pathname.groups.id;
+  if (!id) return respond("Missing document id in path", { status: 400 });
   const tagObject: TagAdd = await request.json();
   const [label, type] =
     (await metafinder.getTagTypes([tagObject.label]))?.[0] ??
@@ -295,8 +297,16 @@ export async function postTag(
   if (tagObject.parameter?.type && !tagObject.parameter?.value) {
     return respond("No value provided", { status: 400 });
   }
-  await metastore.addTag(id, tagObject.label, tagObject.parameter?.value, type);
-  return respond(undefined, { status: 201 });
+  const created = await metastore.addTag(
+    id,
+    tagObject.label,
+    tagObject.parameter?.value,
+    type,
+  );
+  return respond(JSON.stringify(created), {
+    status: 200,
+    headers: { "content-type": "application/json; charset=utf-8" },
+  });
 }
 
 export async function putTitle(
@@ -304,6 +314,7 @@ export async function putTitle(
   match: URLPatternResult,
 ): Promise<Response> {
   const id = match.pathname.groups.id;
+  if (!id) return respond("Missing document id in path", { status: 400 });
   const body = await request.json();
   if (!body || typeof body.title !== "string" || body.title.trim() === "") {
     return respond("Missing or invalid 'title' in request body", { status: 400 });

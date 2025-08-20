@@ -35,7 +35,16 @@ export async function createTag(
     return respond("Label contains forbidden characters", { status: 400 });
   }
   await metastore.createTag(tagObject.label, tagObject.parameter?.type);
-  return respond(undefined, { status: 201 });
+  const created = {
+    label: tagObject.label,
+    parameter: tagObject.parameter?.type
+      ? { type: tagObject.parameter.type }
+      : undefined,
+  };
+  return respond(JSON.stringify(created), {
+    status: 200,
+    headers: { "content-type": "application/json; charset=utf-8" },
+  });
 }
 
 export async function deleteTag(

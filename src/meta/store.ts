@@ -54,7 +54,12 @@ INSERT DATA {
   }
   }
 }`;
-  return await fusekiUpdate(query);
+  await fusekiUpdate(query);
+  // Return a representation matching getTags output for the created tag
+  return {
+    label,
+    parameter: value ? { type, value } : undefined,
+  };
 }
 
 export async function addTitle(id: string, title: string) {
