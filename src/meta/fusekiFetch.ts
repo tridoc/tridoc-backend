@@ -7,13 +7,15 @@ type SparqlJson = {
   };
 };
 
+import { DEFAULT_FUSEKI_PWD } from "../config.ts";
+
 export function dump(accept = "text/turtle") {
   const query = "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }";
   console.log((new Date()).toISOString(), "→ FUSEKI QUERY", query, "\n");
   return fetch("http://fuseki:3030/3DOC/query", {
     method: "POST",
     headers: {
-      "Authorization": "Basic " + btoa("admin:pw123"),
+  "Authorization": getAuthHeader(),
       "Content-Type": "application/sparql-query",
       "Accept": accept,
     },
@@ -26,7 +28,7 @@ export async function fusekiFetch(query: string): Promise<SparqlJson> {
   return await fetch("http://fuseki:3030/3DOC/query", {
     method: "POST",
     headers: {
-      "Authorization": "Basic " + btoa("admin:pw123"),
+  "Authorization": getAuthHeader(),
       "Content-Type": "application/sparql-query",
     },
     body: query,
@@ -44,7 +46,7 @@ export async function fusekiUpdate(query: string): Promise<void> {
   return await fetch("http://fuseki:3030/3DOC/update", {
     method: "POST",
     headers: {
-      "Authorization": "Basic " + btoa("admin:pw123"),
+      "Authorization": getAuthHeader(),
       "Content-Type": "application/sparql-update",
     },
     body: query,
@@ -54,3 +56,9 @@ export async function fusekiUpdate(query: string): Promise<void> {
     }
   });
 }
+
+export function getAuthHeader() {
+  const pwd = Deno.env.get("FUSEKI_PWD") || DEFAULT_FUSEKI_PWD;
+  return "Basic " + btoa("admin:" + pwd);
+}
+

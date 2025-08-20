@@ -2,7 +2,7 @@ import { ensureDir } from "https://deno.land/std@0.160.0/fs/ensure_dir.ts";
 import { emptyDir, writableStreamFromWriter } from "../deps.ts";
 import { respond } from "../helpers/cors.ts";
 import { dump } from "../meta/fusekiFetch.ts";
-import { restore } from "../meta/store.ts";
+import { setGraph } from "../meta/store.ts";
 
 const decoder = new TextDecoder("utf-8");
 
@@ -125,6 +125,28 @@ export async function putZIP(
   await Deno.remove(zipPath);
   const turtleData = decoder.decode(await Deno.readFile("rdf.ttl"));
   await Deno.remove("rdf.ttl");
-  await restore(turtleData);
+  await setGraph(turtleData, "text/turtle");
+  return respond(undefined, { status: 204 });
+}
+
+export async function putRDF(
+  request: Request,
+  _match: URLPatternResult,
+): Promise<Response> {
+  // Replace the entire metadata graph with the provided RDF payload.
+  // Supported serializations: Turtle, TriG, RDF/XML, N-Triples, N-Quads, JSON-LD, etc.
+  // For Turtle/TriG we reuse the local `restore()` (which embeds Turtle into a SPARQL INSERT).
+  // For other serializations we forward the payload to Fuseki's dataset data endpoint
+  // using an HTTP PUT to replace the graph (<http://3doc/meta>).
+  const contentType = (request.headers.get("content-type") || "").toLowerCase();
+  const body = await request.text();
+  if (!body || body.trim() === "") {
+    return respond("Empty request body", { status: 400 });
+  }
+
+  // If content is Turtle or TriG, use the existing restore helper which expects Turtle.
+  // Use setGraph for all content-types; it will decide whether to use SPARQL INSERT
+  // (for Turtle/TriG) or forward the payload to Fuseki (for other serializations).
+  await setGraph(body, contentType || "application/octet-stream");
   return respond(undefined, { status: 204 });
 }

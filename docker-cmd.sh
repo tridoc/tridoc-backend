@@ -11,4 +11,4 @@ else
 fi
 
 echo "[docker-cmd] Launching Deno application..."
-exec deno run --allow-net --allow-read=blobs,rdf.ttl --allow-write=blobs,rdf.ttl --allow-run --allow-env=TRIDOC_PWD,OCR_LANG src/main.ts
+exec deno run --allow-net --allow-read=blobs,rdf.ttl --allow-write=blobs,rdf.ttl --allow-run --allow-env=TRIDOC_PWD,FUSEKI_PWD,OCR_LANG src/main.ts

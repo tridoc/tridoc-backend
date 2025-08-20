@@ -7,7 +7,6 @@ set -euo pipefail
 #
 # Environment:
 #   FUSEKI_PWD  Admin password for Fuseki (default: pw123)
-#   (Deprecated fallback: TRIDOC_PWD if FUSEKI_PWD unset)
 #   FUSEKI_HOST    Hostname of fuseki service (default: fuseki)
 #   FUSEKI_PORT    Port of fuseki service (default: 3030)
 #   FUSEKI_TIMEOUT Seconds to wait for readiness (default: 180)
@@ -16,7 +15,14 @@ set -euo pipefail
 #   ./database-create.sh [DATASET_NAME]
 
 DATASET_NAME="${1:-3DOC}"
-FUSEKI_PWD="${FUSEKI_PWD:-${TRIDOC_PWD:-pw123}}"
+# Load defaults from .env if present. This allows a single place for the default pw123
+if [ -f ".env" ]; then
+  # shellcheck disable=SC1091
+  source .env
+fi
+
+# If FUSEKI_PWD not set in the environment, fall back to .env or default pw123
+FUSEKI_PWD="${FUSEKI_PWD:-${FUSEKI_PWD:-pw123}}"
 FUSEKI_HOST="${FUSEKI_HOST:-fuseki}"
 FUSEKI_PORT="${FUSEKI_PORT:-3030}"
 FUSEKI_TIMEOUT="${FUSEKI_TIMEOUT:-180}"

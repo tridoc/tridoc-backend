@@ -77,6 +77,9 @@ export const routes: {
   }, {
     pattern: new URLPattern({ pathname: "/raw/zip" }),
     handler: raw.putZIP,
+  }, {
+    pattern: new URLPattern({ pathname: "/raw/rdf" }),
+    handler: raw.putRDF,
   }],
   "DELETE": [{
     pattern: new URLPattern({ pathname: "/doc/:id" }),

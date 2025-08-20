@@ -1,4 +1,4 @@
-import { fusekiUpdate } from "./fusekiFetch.ts";
+import { fusekiUpdate, getAuthHeader } from "./fusekiFetch.ts";
 
 function escapeLiteral(string: string) {
   return string.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(
@@ -95,12 +95,24 @@ INSERT DATA {
   return await fusekiUpdate(query);
 }
 
-export function restore(turtleData: string) {
-  return fusekiUpdate(`
-CLEAR GRAPH <http://3doc/meta>;
-INSERT DATA {
-   GRAPH <http://3doc/meta> { ${turtleData} }
-}`);
+export function setGraph(data: string, contentType = "text/turtle") {
+  // Forward all payloads to Fuseki's data endpoint and let Fuseki parse the provided
+  // serialization according to the Content-Type. This keeps a single code path
+  // and supports every Fuseki-supported RDF serialization uniformly.
+  const url = `http://fuseki:3030/3DOC/data?graph=${encodeURIComponent("http://3doc/meta")}`;
+  return fetch(url, {
+    method: "PUT",
+    headers: {
+      "Authorization": getAuthHeader(),
+      "Content-Type": contentType,
+    },
+    body: data,
+  }).then(async (res) => {
+    if (!res.ok) {
+      const text = await res.text().catch(() => "(no response body)");
+      throw new Error(`Fuseki Error while replacing graph: ${res.status} ${text}`);
+    }
+  });
 }
 
 export async function storeDocument(
