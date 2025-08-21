@@ -144,9 +144,6 @@ export async function putRDF(
     return respond("Empty request body", { status: 400 });
   }
 
-  // If content is Turtle or TriG, use the existing restore helper which expects Turtle.
-  // Use setGraph for all content-types; it will decide whether to use SPARQL INSERT
-  // (for Turtle/TriG) or forward the payload to Fuseki (for other serializations).
   await setGraph(body, contentType || "application/octet-stream");
   return respond(undefined, { status: 204 });
 }
