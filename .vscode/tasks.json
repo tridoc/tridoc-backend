@@ -10,7 +10,7 @@
                 "--watch",
                 "--allow-net",
                 "--allow-read=blobs,rdf.ttl",
-                "--allow-write=blobs,rdf.ttl",
+                "--allow-write=blobs,rdf.ttl,/tmp",
                 "--allow-run",
                 "--allow-env=TRIDOC_PWD,OCR_LANG",
                 "src/main.ts"

@@ -12,7 +12,7 @@
                 "--watch",
                 "--allow-net",
                 "--allow-read=blobs,rdf.ttl",
-                "--allow-write=blobs,rdf.ttl",
+                "--allow-write=blobs,rdf.ttl,/tmp",
                 "--allow-run",
                 "--allow-env=FUSEKI_PWD,TRIDOC_PWD,OCR_LANG"
             ],

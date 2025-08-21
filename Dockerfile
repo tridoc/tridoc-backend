@@ -38,6 +38,10 @@ RUN mkdir -p /home/deno && \
 COPY src/deps.ts src/deps.ts
 RUN deno cache src/deps.ts
 
+# Entrypoint: If you add a CMD or ENTRYPOINT for deno run, make sure all required Deno permissions are present (e.g., --allow-write for all needed directories, --allow-read, --allow-net, etc.)
+# Example:
+# CMD ["run", "--allow-net", "--allow-read=blobs,rdf.ttl", "--allow-write=blobs,rdf.ttl,/tmp", "--allow-run", "--allow-env=TRIDOC_PWD,OCR_LANG", "src/main.ts"]
+
 # Copy application source
 COPY . .
 
