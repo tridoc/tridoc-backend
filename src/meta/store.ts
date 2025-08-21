@@ -110,7 +110,7 @@ export function setGraph(data: string, contentType = "text/turtle") {
   }).then(async (res) => {
     if (!res.ok) {
       const text = await res.text().catch(() => "(no response body)");
-      throw new Error(`Fuseki Error while replacing graph: ${res.status} ${text}`);
+      throw new Error(`Fuseki Error replacing ${contentType} graph: ${res.status} ${text}`);
     }
   });
 }

@@ -134,16 +134,12 @@ export async function putRDF(
   _match: URLPatternResult,
 ): Promise<Response> {
   // Replace the entire metadata graph with the provided RDF payload.
-  // Supported serializations: Turtle, TriG, RDF/XML, N-Triples, N-Quads, JSON-LD, etc.
-  // For Turtle/TriG we reuse the local `restore()` (which embeds Turtle into a SPARQL INSERT).
-  // For other serializations we forward the payload to Fuseki's dataset data endpoint
-  // using an HTTP PUT to replace the graph (<http://3doc/meta>).
-  const contentType = (request.headers.get("content-type") || "").toLowerCase();
+  const contentType = request.headers.get("content-type")?.toLowerCase();
   const body = await request.text();
   if (!body || body.trim() === "") {
     return respond("Empty request body", { status: 400 });
   }
 
-  await setGraph(body, contentType || "application/octet-stream");
+  await setGraph(body, contentType);
   return respond(undefined, { status: 204 });
 }
