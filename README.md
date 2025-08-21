@@ -126,6 +126,8 @@ When getting a comment, a JSON array with objects of the following structure is 
 | `/raw/rdf`                 | DELETE | Remove the temporary `rdf.ttl` file created during a backup upload (cancels a failed zip upload). Note: this does NOT delete stored metadata — `GET /raw/rdf` will continue to return the RDF data; use only if you are sure no upload is in progress. | - | 204 No Content | WIP |
 | `/raw/rdf`                 | PUT    | Replace the `http://3doc/meta` metadata graph in the backend with the provided RDF payload. | Any RDF serialization (Content-Type) | 204 No Content | WIP |
 | `/raw/zip` or `/raw/tgz`   | GET    | Get all data. Useful for backups     | - | ZIP / TGZ containing blobs/ directory with all pdfs as stored within tridoc and a rdf.ttl file with all metadata. | 1.3.0 |
+| `/orphaned/tgz`            | GET    | Get a tar.gz archive of orphaned blob files (files in `blobs/` not referenced in the metadata graph) | - | TGZ containing orphaned blobs | 1.6.0 |
+| `/orphaned/zip`            | GET    | Get a zip archive of orphaned blob files (files in `blobs/` not referenced in the metadata graph) | - | ZIP containing orphaned blobs | 1.6.0 |
 | `/raw/zip`                 | PUT    | Replace all data with backup zip     | ZIP | Replaces the metadata and adds the blobs from the zip | 1.3.0 |
 | `/tag`                     | POST   | Create new tag                       | See above | - | 1.1.0 |
 | `/tag`                     | GET    | Get (list of) all tags               | - | - | 1.1.0 |

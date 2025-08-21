@@ -2,6 +2,7 @@ import { options } from "../handlers/cors.ts";
 import { count } from "../handlers/count.ts";
 import * as doc from "../handlers/doc.ts";
 import * as raw from "../handlers/raw.ts";
+import * as orphaned from "../handlers/orphaned.ts";
 import * as tag from "../handlers/tag.ts";
 import { version } from "../handlers/version.ts";
 
@@ -48,6 +49,12 @@ export const routes: {
   }, {
     pattern: new URLPattern({ pathname: "/raw/tgz" }),
     handler: raw.getTGZ,
+  }, {
+    pattern: new URLPattern({ pathname: "/orphaned/tgz" }),
+    handler: orphaned.getOrphanedTGZ,
+  }, {
+    pattern: new URLPattern({ pathname: "/orphaned/zip" }),
+    handler: orphaned.getOrphanedZIP,
   }, {
     pattern: new URLPattern({ pathname: "/tag" }),
     handler: tag.getTagList,
