@@ -133,3 +133,24 @@ INSERT DATA {
 }`;
   return await fusekiUpdate(query);
 }
+
+export async function storeDocumentWithBlob(
+  { id, text, date, blobHash }: { id: string; text: string; date?: string; blobHash: string },
+) {
+  const created = (date ? new Date(date) : new Date()).toISOString();
+  const query = `
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX s: <http://schema.org/>
+PREFIX tridoc: <http://vocab.tridoc.me/>
+INSERT DATA {
+  GRAPH <http://3doc/meta> {
+    <http://3doc/data/${id}> rdf:type s:DigitalDocument ;
+    s:dateCreated "${created}"^^xsd:dateTime ;
+    s:identifier "${id}" ;
+    s:text "${escapeLiteral(text)}" ;
+    tridoc:blob "${blobHash}" .
+  }
+}`;
+  return await fusekiUpdate(query);
+}

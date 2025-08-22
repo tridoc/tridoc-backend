@@ -14,7 +14,8 @@ async function listAllBlobFiles(): Promise<string[]> {
         // skip the rdf metadata folder
         if (p.endsWith("/rdf")) continue;
         await walk(p);
-      } else if (entry.isFile) {
+      } else if (entry.isFile && !entry.name.endsWith('.png')) {
+        // Only include non-thumbnail files
         result.push(p);
       }
     }
@@ -40,8 +41,11 @@ export async function getOrphanedTGZ(
   _match: URLPatternResult,
 ): Promise<Response> {
   const allFiles = await listAllBlobFiles();
+  const referenced = await metafinder.getReferencedBlobs();
+  // Also include legacy document IDs that might still be referenced
   const docs = await metafinder.getDocumentList({});
-  const referenced = new Set(docs.map((d: Record<string, string>) => d.identifier));
+  docs.forEach((d: Record<string, string>) => referenced.add(d.identifier));
+  
   const orphaned = allFiles.filter((p) => !referenced.has(basename(p)));
   if (orphaned.length === 0) return respond(undefined, { status: 204 });
 
@@ -89,8 +93,11 @@ export async function getOrphanedZIP(
   _match: URLPatternResult,
 ): Promise<Response> {
   const allFiles = await listAllBlobFiles();
+  const referenced = await metafinder.getReferencedBlobs();
+  // Also include legacy document IDs that might still be referenced
   const docs = await metafinder.getDocumentList({});
-  const referenced = new Set(docs.map((d: Record<string, string>) => d.identifier));
+  docs.forEach((d: Record<string, string>) => referenced.add(d.identifier));
+  
   const orphaned = allFiles.filter((p) => !referenced.has(basename(p)));
   if (orphaned.length === 0) return respond(undefined, { status: 204 });
 

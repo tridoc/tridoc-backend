@@ -4,6 +4,7 @@ Server-side infrastructure for tridoc: easy document management for individuals 
 
 ## Table Of Contents
 * [Setup](#setup)
+* [Blob Storage](#blob-storage)
 * [Tag System](#tag-system)
     * [Simple Tags](#simple-tags)
     * [Parameterizable &amp; Parameterized Tags](#parameterizable--parameterized-tags)
@@ -30,6 +31,14 @@ $env:TRIDOC_PWD = "YOUR PASSWORD HERE"
 ```
 
 _For more Setup options see the <a href="./DEV-README.md">DEV-README.md</a>_
+
+## Blob Storage
+
+Tridoc uses hash-based blob storage for content deduplication and integrity verification. File content is hashed using IPFS-compatible SHA-256 multihash, and stored in a content-addressable file system.
+
+**Document vs Blob Separation**: Documents (logical entities with metadata like title, tags, comments) are separate from blobs (file content). Multiple documents can reference the same blob if they contain identical content.
+
+**Migration**: Use the `/migrate` endpoint to migrate existing installations from nanoid-based to hash-based storage.
 
 ## Tag System
 
@@ -133,6 +142,7 @@ When getting a comment, a JSON array with objects of the following structure is 
 | `/tag`                     | GET    | Get (list of) all tags               | - | - | 1.1.0 |
 | `/tag/{tagLabel}`          | GET    | Get Documents with this tag. Same as `/doc?tag={tagLabel}` | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> | Array of objects with document identifiers and titles (where available) |  1.1.0 |
 | `/tag/{tagLabel}`          | DELETE | Delete this tag                      | - | - | 1.1.0 |
+| `/migrate`                 | GET    | Migrate existing nanoid-based blob storage to hash-based storage. Separates documents from blobs in metadata. | - | Migration status JSON with counts and errors | 1.6.0 |
 | `/version`                 | GET    | Get tridoc version                   | - | semver version number | 1.1.0 |
 
 #### URL-Parameters supported:

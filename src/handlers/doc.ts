@@ -1,8 +1,8 @@
-import { ensureDir } from "https://deno.land/std@0.160.0/fs/ensure_dir.ts";
-import { nanoid, writableStreamFromWriter } from "../deps.ts";
+import { nanoid } from "../deps.ts";
 import { respond } from "../helpers/cors.ts";
 import { getText } from "../helpers/pdfprocessor.ts";
 import { processParams } from "../helpers/processParams.ts";
+import { storeBlob, getBlobPath, getThumbnailPath } from "../helpers/blobStore.ts";
 import * as metadelete from "../meta/delete.ts";
 import * as metafinder from "../meta/finder.ts";
 import * as metastore from "../meta/store.ts";
@@ -17,7 +17,7 @@ type TagAdd = {
   }; // only for parameterizable tags
 };
 
-function getDir(id: string) {
+function _getDir(id: string) {
   return "./blobs/" + id.slice(0, 2) + "/" + id.slice(2, 6) + "/" +
     id.slice(6, 14);
 }
@@ -39,7 +39,7 @@ export async function deleteDoc(
   _request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
-  const id = match.pathname.groups.id;
+  const id = match.pathname.groups.id!;
   await metadelete.deleteFile(id);
   return respond(undefined, { status: 204 });
 }
@@ -49,8 +49,8 @@ export async function deleteTag(
   match: URLPatternResult,
 ) {
   await metadelete.deleteTag(
-    decodeURIComponent(match.pathname.groups.tagLabel),
-    match.pathname.groups.id,
+    decodeURIComponent(match.pathname.groups.tagLabel!),
+    match.pathname.groups.id!,
   );
   return respond(undefined, { status: 204 });
 }
@@ -58,7 +58,7 @@ export async function deleteTitle(
   _request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
-  const id = match.pathname.groups.id;
+  const id = match.pathname.groups.id!;
   await metadelete.deleteTitle(id);
   return respond(undefined, { status: 201 });
 }
@@ -81,11 +81,20 @@ export async function getPDF(
   match: URLPatternResult,
 ): Promise<Response> {
   const id = match.pathname.groups.id!;
-  const path = getPath(id);
+  const meta = await metafinder.getBasicMeta(id);
+  
+  // Determine the file path based on whether we have a blob hash or legacy ID
+  let path: string;
+  if (meta.blob) {
+    // New hash-based storage
+    path = getBlobPath(meta.blob);
+  } else {
+    // Legacy nanoid-based storage
+    path = getPath(id);
+  }
+  
   try {
-    const fileName = await metafinder.getBasicMeta(id).then((
-      { title, created },
-    ) => title || created || "document");
+    const fileName = meta.title || meta.created || "document";
     const file = await Deno.open(path, { read: true });
     // Build a readable stream so the file doesn't have to be fully loaded into memory while we send it
     const readableStream = file.readable;
@@ -139,24 +148,41 @@ export async function getThumb(
   match: URLPatternResult,
 ): Promise<Response> {
   const id = match.pathname.groups.id!;
-  const path = getPath(id);
-  const fileName = await metafinder.getBasicMeta(id).then((
-    { title, created },
-  ) => title || created || "thumbnail");
+  const meta = await metafinder.getBasicMeta(id);
+  
+  // Determine the file path based on whether we have a blob hash or legacy ID
+  let thumbPath: string;
+  if (meta.blob) {
+    // New hash-based storage
+    thumbPath = getThumbnailPath(meta.blob);
+  } else {
+    // Legacy nanoid-based storage
+    thumbPath = getPath(id) + ".png";
+  }
+  
+  const fileName = meta.title || meta.created || "thumbnail";
   let thumb: Deno.FsFile;
   try {
-    thumb = await Deno.open(path + ".png", { read: true });
+    thumb = await Deno.open(thumbPath, { read: true });
   } catch (error) {
     if (error instanceof Deno.errors.NotFound) {
         try {
-          await Deno.stat(path); // Check if PDF exists → 404 otherwise
+          // Get the blob path for thumbnail generation
+          let blobPath: string;
+          if (meta.blob) {
+            blobPath = getBlobPath(meta.blob);
+          } else {
+            blobPath = getPath(id);
+          }
+          
+          await Deno.stat(blobPath); // Check if PDF exists → 404 otherwise
           const cmd = new Deno.Command("convert", {
-            args: ["-thumbnail", "300x", "-alpha", "remove", `${path}[0]`, `${path}.png`],
+            args: ["-thumbnail", "300x", "-alpha", "remove", `${blobPath}[0]`, thumbPath],
           });
           const p = cmd.spawn();
           const status = await p.status;
           if (!status.success) throw new Error("convert failed with code " + status.code);
-          thumb = await Deno.open(path + ".png", { read: true });
+          thumb = await Deno.open(thumbPath, { read: true });
         } catch (error) {
         if (error instanceof Deno.errors.NotFound) {
           return respond("404 Not Found", { status: 404 });
@@ -181,7 +207,7 @@ export async function getTitle(
   _request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
-  const id = match.pathname.groups.id;
+  const id = match.pathname.groups.id!;
   const meta = await metafinder.getBasicMeta(id);
   return respond(JSON.stringify({ title: meta.title ?? null }), {
     headers: {
@@ -207,7 +233,7 @@ export async function postComment(
   request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
-  const id = match.pathname.groups.id;
+  const id = match.pathname.groups.id!;
   if (!id) return respond("Missing document id in path", { status: 400 });
   const body = await request.json();
   if (!body || typeof body.text !== "string" || body.text.trim() === "") {
@@ -226,38 +252,65 @@ export async function postPDF(
   request: Request,
   _match: URLPatternResult,
 ): Promise<Response> {
-  const id = nanoid();
-  const path = getPath(id);
-  await ensureDir(getDir(id));
-  const pdf = await Deno.open(path, { write: true, create: true });
-  const writableStream = writableStreamFromWriter(pdf);
-  await request.body?.pipeTo(writableStream);
-  console.log((new Date()).toISOString(), "Document created with id", id);
-  let text = await getText(path);
+  const id = nanoid(); // Document ID (separate from blob hash)
+  
+  // Read the content into memory to compute hash and store blob
+  const chunks: Uint8Array[] = [];
+  const reader = request.body?.getReader();
+  if (!reader) {
+    return respond("Missing request body", { status: 400 });
+  }
+  
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  
+  // Combine chunks into a single Uint8Array
+  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+  const content = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    content.set(chunk, offset);
+    offset += chunk.length;
+  }
+  
+  // Store blob using content hash
+  const blobHash = await storeBlob(content);
+  const blobPath = getBlobPath(blobHash);
+  
+  console.log((new Date()).toISOString(), "Document created with id", id, "blob hash", blobHash);
+  let text = await getText(blobPath);
   if (text.length < 4) {
     // run OCR
     const lang = Deno.env.get("OCR_LANG") || "fra+deu+eng";
-  const cmd = new Deno.Command("pdfsandwich", { args: ["-rgb", "-lang", lang, path] });
+  const cmd = new Deno.Command("pdfsandwich", { args: ["-rgb", "-lang", lang, blobPath] });
   const p = cmd.spawn();
   const status = await p.status;
   if (!status.success) throw new Error("pdfsandwich failed with code " + status.code);
     // pdfsandwich generates a file with the same name + _ocr
-    await Deno.rename(path + "_ocr", path);
-    text = await getText(path);
+    await Deno.rename(blobPath + "_ocr", blobPath);
+    text = await getText(blobPath);
     console.log((new Date()).toISOString(), id, ": OCR finished");
   }
   // no await as we don’t care for the result - if it fails, the thumbnail will be created upon request.
   // Fire-and-forget thumbnail generation (non-blocking)
   try {
+    const thumbPath = getThumbnailPath(blobHash);
     const cmd = new Deno.Command("convert", {
-      args: ["-thumbnail", "300x", "-alpha", "remove", `${path}[0]`, `${path}.png`],
+      args: ["-thumbnail", "300x", "-alpha", "remove", `${blobPath}[0]`, thumbPath],
     });
     cmd.spawn();
   } catch (_) {
     // ignore spawn errors for background thumbnail creation
   }
   const date = datecheck(request);
-  await metastore.storeDocument({ id, text, date });
+  await metastore.storeDocumentWithBlob({ id, text, date, blobHash });
   return respond(undefined, {
     headers: {
       "Location": "/doc/" + id,
@@ -270,7 +323,7 @@ export async function postTag(
   request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
-  const id = match.pathname.groups.id;
+  const id = match.pathname.groups.id!;
   if (!id) return respond("Missing document id in path", { status: 400 });
   const tagObject: TagAdd = await request.json();
   const [label, type] =
@@ -303,7 +356,7 @@ export async function putTitle(
   request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
-  const id = match.pathname.groups.id;
+  const id = match.pathname.groups.id!;
   if (!id) return respond("Missing document id in path", { status: 400 });
   const body = await request.json();
   if (!body || typeof body.title !== "string" || body.title.trim() === "") {

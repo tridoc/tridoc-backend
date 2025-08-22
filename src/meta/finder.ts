@@ -175,15 +175,19 @@ export async function getBasicMeta(id: string) {
   return await fusekiFetch(`
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX s: <http://schema.org/>
-SELECT ?title ?date
+PREFIX tridoc: <http://vocab.tridoc.me/>
+SELECT ?title ?date ?blob
 WHERE {
   ?s s:identifier "${id}" .
   ?s s:dateCreated ?date .
   OPTIONAL { ?s s:name ?title . }
+  OPTIONAL { ?s tridoc:blob ?blob . }
 }`).then((json) => {
+    const binding = json.results.bindings[0];
     return {
-      title: json.results.bindings[0]?.title?.value,
-      created: json.results.bindings[0]?.date?.value,
+      title: binding?.title?.value,
+      created: binding?.date?.value,
+      blob: binding?.blob?.value,
     };
   });
 }
@@ -254,4 +258,15 @@ SELECT DISTINCT ?l ?t WHERE { VALUES ?l { "${
       return result_1;
     },
   );
+}
+
+export async function getReferencedBlobs(): Promise<Set<string>> {
+  const json = await fusekiFetch(`
+PREFIX tridoc: <http://vocab.tridoc.me/>
+SELECT DISTINCT ?blob WHERE {
+  GRAPH <http://3doc/meta> {
+    ?s tridoc:blob ?blob .
+  }
+}`);
+  return new Set(json.results.bindings.map((binding) => binding.blob.value));
 }

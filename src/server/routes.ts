@@ -4,6 +4,7 @@ import * as doc from "../handlers/doc.ts";
 import * as raw from "../handlers/raw.ts";
 import * as orphaned from "../handlers/orphaned.ts";
 import * as tag from "../handlers/tag.ts";
+import * as migrate from "../handlers/migrate.ts";
 import { version } from "../handlers/version.ts";
 
 export const routes: {
@@ -64,6 +65,9 @@ export const routes: {
   }, {
     pattern: new URLPattern({ pathname: "/version" }),
     handler: version,
+  }, {
+    pattern: new URLPattern({ pathname: "/migrate" }),
+    handler: migrate.migrateBlobs,
   }],
   "POST": [{
     pattern: new URLPattern({ pathname: "/doc" }),
