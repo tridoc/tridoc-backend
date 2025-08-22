@@ -47,16 +47,34 @@ export async function getOrphanedTGZ(
 
   const ts = Date.now();
   const fileList = await writeFileList(orphaned);
-  const tarPath = `blobs/orphaned-tgz-${ts}.tar.gz`;
-  // Use tar -T to read file list and preserve file metadata
+  const tmpDir = await Deno.makeTempDir({ prefix: "orphaned-" });
+  const tarPath = `${tmpDir}/orphaned-tgz-${ts}.tar.gz`;
+  // Use tar -T to read file list and preserve file metadata. Create archive in tmp dir
   const cmd = new Deno.Command("bash", {
     args: ["-c", `tar -C blobs -czf ${tarPath} -T ${fileList}`],
   });
   const p = cmd.spawn();
   const status = await p.status;
+  // Remove the temporary file list regardless of tar success
   await Deno.remove(fileList);
-  if (!status.success) throw new Error("tar failed with code " + status.code);
+  if (!status.success) {
+    // cleanup tmp dir if tar failed
+    try {
+      await Deno.remove(tmpDir, { recursive: true });
+    } catch (_e) {
+      // ignore
+    }
+    throw new Error("tar failed with code " + status.code);
+  }
   const f = await Deno.open(tarPath, { read: true });
+  // unlink the archive so it doesn't linger on disk; fd remains readable on POSIX systems
+  try {
+    await Deno.remove(tarPath);
+    // remove the temporary directory now that the file is unlinked
+    await Deno.remove(tmpDir, { recursive: true });
+  } catch (_e) {
+    // ignore cleanup errors
+  }
   const readableStream = f.readable;
   return respond(readableStream, {
     headers: {
@@ -78,16 +96,32 @@ export async function getOrphanedZIP(
 
   const ts = Date.now();
   const fileList = await writeFileList(orphaned);
-  const zipPath = `blobs/orphaned-zip-${ts}.zip`;
+  const tmpDir = await Deno.makeTempDir({ prefix: "orphaned-" });
+  const zipPath = `${tmpDir}/orphaned-zip-${ts}.zip`;
   // Use zip reading file list from stdin to avoid copying and preserve metadata where possible
   const cmd = new Deno.Command("bash", {
     args: ["-c", `cd blobs && xargs -a ${fileList} zip -@ ${zipPath}`],
   });
   const p = cmd.spawn();
   const status = await p.status;
+  // Remove the temporary file list regardless of zip success
   await Deno.remove(fileList);
-  if (!status.success) throw new Error("zip failed with code " + status.code);
+  if (!status.success) {
+    try {
+      await Deno.remove(tmpDir, { recursive: true });
+    } catch (_e) {
+      // ignore
+    }
+    throw new Error("zip failed with code " + status.code);
+  }
   const f = await Deno.open(zipPath, { read: true });
+  // unlink the archive so it doesn't linger on disk; fd remains readable on POSIX systems
+  try {
+    await Deno.remove(zipPath);
+    await Deno.remove(tmpDir, { recursive: true });
+  } catch (_e) {
+    // ignore cleanup errors
+  }
   const readableStream = f.readable;
   return respond(readableStream, {
     headers: {
