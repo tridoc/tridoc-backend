@@ -6,6 +6,8 @@ import { storeBlob, getBlobPath, getThumbnailPath } from "../helpers/blobStore.t
 import * as metadelete from "../meta/delete.ts";
 import * as metafinder from "../meta/finder.ts";
 import * as metastore from "../meta/store.ts";
+import { ensureDir } from "../deps.ts";
+import { hashToThumbnailPath } from "../helpers/ipfsHash.ts";
 
 type TagAdd = {
   label: string;
@@ -171,23 +173,37 @@ export async function getThumb(
           let blobPath: string;
           if (meta.blob) {
             blobPath = getBlobPath(meta.blob);
+            // Ensure the thumbnail directory exists for hash-based storage
+            const { dir: thumbDir } = hashToThumbnailPath(meta.blob);
+            await ensureDir(thumbDir);
           } else {
             blobPath = getPath(id);
+            // For legacy storage the directory should already exist with the PDF
           }
           
           await Deno.stat(blobPath); // Check if PDF exists → 404 otherwise
           const cmd = new Deno.Command("convert", {
             args: ["-thumbnail", "300x", "-alpha", "remove", `${blobPath}[0]`, thumbPath],
+            stdout: "piped",
+            stderr: "piped",
           });
-          const p = cmd.spawn();
-          const status = await p.status;
-          if (!status.success) throw new Error("convert failed with code " + status.code);
+          const { success, code, stdout, stderr } = await cmd.output();
+          if (!success) {
+            const td = new TextDecoder();
+            const err = td.decode(stderr) || td.decode(stdout);
+            console.error("ImageMagick convert error (on-demand):", err.trim());
+            throw new Error("convert failed with code " + code + (err ? ": " + err : ""));
+          }
           thumb = await Deno.open(thumbPath, { read: true });
         } catch (error) {
         if (error instanceof Deno.errors.NotFound) {
           return respond("404 Not Found", { status: 404 });
         }
-        throw error;
+        // Surface ImageMagick error to client for easier debugging
+        if (error instanceof Error) {
+          return respond("Thumbnail generation failed: " + error.message, { status: 500 });
+        }
+        return respond("Thumbnail generation failed", { status: 500 });
       }
     } else {
       throw error;
@@ -301,9 +317,14 @@ export async function postPDF(
   // no await as we don’t care for the result - if it fails, the thumbnail will be created upon request.
   // Fire-and-forget thumbnail generation (non-blocking)
   try {
+    const { dir: thumbDir } = hashToThumbnailPath(blobHash);
+    await ensureDir(thumbDir);
     const thumbPath = getThumbnailPath(blobHash);
     const cmd = new Deno.Command("convert", {
       args: ["-thumbnail", "300x", "-alpha", "remove", `${blobPath}[0]`, thumbPath],
+      // Inherit stdio so any ImageMagick errors are visible in server logs
+      stdout: "inherit",
+      stderr: "inherit",
     });
     cmd.spawn();
   } catch (_) {
