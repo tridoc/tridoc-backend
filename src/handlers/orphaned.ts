@@ -2,8 +2,16 @@ import { respond } from "../helpers/cors.ts";
 import * as metafinder from "../meta/finder.ts";
 
 function basename(path: string) {
-  return path.replace(/^.*\//, "");
+  // Return the filename without any directory prefix and without extension.
+  // RDF stores the bare hash (no path, no extension), so strip extensions
+  // from filesystem names before comparing.
+  return path.replace(/^.*\//, "").replace(/\.[^/.]+$/, "");
 }
+
+function stripExtension(name: string) {
+  return name.replace(/\.[^/.]+$/, "");
+}
+
 
 async function listAllBlobFiles(): Promise<string[]> {
   const result: string[] = [];
@@ -45,8 +53,13 @@ export async function getOrphanedTGZ(
   // Also include legacy document IDs that might still be referenced
   const docs = await metafinder.getDocumentList({});
   docs.forEach((d: Record<string, string>) => referenced.add(d.identifier));
-  
-  const orphaned = allFiles.filter((p) => !referenced.has(basename(p)));
+
+  // RDF stores the bare hash (no path, no extension). Strip extensions from
+  // filesystem names and compare directly against the referenced set.
+  const orphaned = allFiles.filter((p) => {
+    const nameNoExt = stripExtension(basename(p));
+    return !referenced.has(nameNoExt);
+  });
   if (orphaned.length === 0) return respond(undefined, { status: 204 });
 
   const ts = Date.now();
@@ -97,8 +110,13 @@ export async function getOrphanedZIP(
   // Also include legacy document IDs that might still be referenced
   const docs = await metafinder.getDocumentList({});
   docs.forEach((d: Record<string, string>) => referenced.add(d.identifier));
-  
-  const orphaned = allFiles.filter((p) => !referenced.has(basename(p)));
+
+  // RDF stores the bare hash (no path, no extension). Strip extensions from
+  // filesystem names and compare directly against the referenced set.
+  const orphaned = allFiles.filter((p) => {
+    const nameNoExt = stripExtension(basename(p));
+    return !referenced.has(nameNoExt);
+  });
   if (orphaned.length === 0) return respond(undefined, { status: 204 });
 
   const ts = Date.now();
