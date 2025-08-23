@@ -1,4 +1,4 @@
-FROM denoland/deno:2.4.4
+FROM denoland/deno:2.4.5
 
 EXPOSE 8000
 
@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 
 # Install required packages (union of prod + dev wants)
 RUN apt update \
-    && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra curl git zip unzip iputils-ping \
+    && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra curl git zip unzip iputils-ping procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Remove restrictive ImageMagick policy if present (non-fatal if absent)
