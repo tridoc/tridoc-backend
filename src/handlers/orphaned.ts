@@ -12,7 +12,6 @@ function stripExtension(name: string) {
   return name.replace(/\.[^/.]+$/, "");
 }
 
-
 async function listAllBlobFiles(): Promise<string[]> {
   const result: string[] = [];
   async function walk(dir: string) {
@@ -44,10 +43,7 @@ async function writeFileList(paths: string[]) {
   return tmp;
 }
 
-export async function getOrphanedTGZ(
-  _request: Request,
-  _match: URLPatternResult,
-): Promise<Response> {
+async function getOrphanedFiles(): Promise<string[]> {
   const allFiles = await listAllBlobFiles();
   const referenced = await metafinder.getReferencedBlobs();
   // Also include legacy document IDs that might still be referenced
@@ -60,98 +56,95 @@ export async function getOrphanedTGZ(
     const nameNoExt = stripExtension(basename(p));
     return !referenced.has(nameNoExt);
   });
-  if (orphaned.length === 0) return respond(undefined, { status: 204 });
+  
+  return orphaned;
+}
 
+async function createArchive(
+  orphaned: string[],
+  format: "zip" | "tgz"
+): Promise<{ path: string; tmpDir: string; fileList: string }> {
   const ts = Date.now();
   const fileList = await writeFileList(orphaned);
   const tmpDir = await Deno.makeTempDir({ prefix: "orphaned-" });
-  const tarPath = `${tmpDir}/orphaned-tgz-${ts}.tar.gz`;
-  // Use tar -T to read file list and preserve file metadata. Create archive in tmp dir
-  const cmd = new Deno.Command("bash", {
-    args: ["-c", `tar -C blobs -czf ${tarPath} -T ${fileList}`],
-  });
+  const archivePath = `${tmpDir}/orphaned-${format}-${ts}.${format === "zip" ? "zip" : "tar.gz"}`;
+  
+  let cmd: Deno.Command;
+  
+  if (format === "zip") {
+    // Use zip with file list - need to use xargs to read from file properly
+    cmd = new Deno.Command("bash", {
+      args: ["-c", `cd blobs && cat ${fileList} | xargs zip ${archivePath}`],
+    });
+  } else {
+    // Use tar with file list
+    cmd = new Deno.Command("bash", {
+      args: ["-c", `tar -C blobs -czf ${archivePath} -T ${fileList}`],
+    });
+  }
+  
   const p = cmd.spawn();
   const status = await p.status;
-  // Remove the temporary file list regardless of tar success
-  await Deno.remove(fileList);
+  
   if (!status.success) {
-    // cleanup tmp dir if tar failed
+    // Clean up on failure
     try {
+      await Deno.remove(fileList);
       await Deno.remove(tmpDir, { recursive: true });
     } catch (_e) {
-      // ignore
+      // ignore cleanup errors
     }
-    throw new Error("tar failed with code " + status.code);
+    throw new Error(`${format} creation failed with code ${status.code}`);
   }
-  const f = await Deno.open(tarPath, { read: true });
+  
+  return { path: archivePath, tmpDir, fileList };
+}
+
+async function createArchiveResponse(
+  format: "zip" | "tgz"
+): Promise<Response> {
+  const orphaned = await getOrphanedFiles();
+  if (orphaned.length === 0) return respond(undefined, { status: 204 });
+
+  const { path: archivePath, tmpDir, fileList } = await createArchive(orphaned, format);
+  
+  // Remove the temporary file list
+  await Deno.remove(fileList);
+  
+  const f = await Deno.open(archivePath, { read: true });
+  
   // unlink the archive so it doesn't linger on disk; fd remains readable on POSIX systems
   try {
-    await Deno.remove(tarPath);
+    await Deno.remove(archivePath);
     // remove the temporary directory now that the file is unlinked
     await Deno.remove(tmpDir, { recursive: true });
   } catch (_e) {
     // ignore cleanup errors
   }
+  
   const readableStream = f.readable;
+  const ts = Date.now();
+  const extension = format === "zip" ? "zip" : "tar.gz";
+  const contentType = format === "zip" ? "application/zip" : "application/gzip";
+  
   return respond(readableStream, {
     headers: {
-      "content-disposition": `inline; filename="tridoc_orphaned_${ts}.tar.gz"`,
-      "content-type": "application/gzip",
+      "content-disposition": `inline; filename="tridoc_orphaned_${ts}.${extension}"`,
+      "content-type": contentType,
     },
   });
+}
+
+export async function getOrphanedTGZ(
+  _request: Request,
+  _match: URLPatternResult,
+): Promise<Response> {
+  return await createArchiveResponse("tgz");
 }
 
 export async function getOrphanedZIP(
   _request: Request,
   _match: URLPatternResult,
 ): Promise<Response> {
-  const allFiles = await listAllBlobFiles();
-  const referenced = await metafinder.getReferencedBlobs();
-  // Also include legacy document IDs that might still be referenced
-  const docs = await metafinder.getDocumentList({});
-  docs.forEach((d: Record<string, string>) => referenced.add(d.identifier));
-
-  // RDF stores the bare hash (no path, no extension). Strip extensions from
-  // filesystem names and compare directly against the referenced set.
-  const orphaned = allFiles.filter((p) => {
-    const nameNoExt = stripExtension(basename(p));
-    return !referenced.has(nameNoExt);
-  });
-  if (orphaned.length === 0) return respond(undefined, { status: 204 });
-
-  const ts = Date.now();
-  const fileList = await writeFileList(orphaned);
-  const tmpDir = await Deno.makeTempDir({ prefix: "orphaned-" });
-  const zipPath = `${tmpDir}/orphaned-zip-${ts}.zip`;
-  // Use zip reading file list from stdin to avoid copying and preserve metadata where possible
-  const cmd = new Deno.Command("bash", {
-    args: ["-c", `cd blobs && xargs -a ${fileList} zip -@ ${zipPath}`],
-  });
-  const p = cmd.spawn();
-  const status = await p.status;
-  // Remove the temporary file list regardless of zip success
-  await Deno.remove(fileList);
-  if (!status.success) {
-    try {
-      await Deno.remove(tmpDir, { recursive: true });
-    } catch (_e) {
-      // ignore
-    }
-    throw new Error("zip failed with code " + status.code);
-  }
-  const f = await Deno.open(zipPath, { read: true });
-  // unlink the archive so it doesn't linger on disk; fd remains readable on POSIX systems
-  try {
-    await Deno.remove(zipPath);
-    await Deno.remove(tmpDir, { recursive: true });
-  } catch (_e) {
-    // ignore cleanup errors
-  }
-  const readableStream = f.readable;
-  return respond(readableStream, {
-    headers: {
-      "content-disposition": `inline; filename="tridoc_orphaned_${ts}.zip"`,
-      "content-type": "application/zip",
-    },
-  });
+  return await createArchiveResponse("zip");
 }
