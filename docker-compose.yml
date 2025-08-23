@@ -18,5 +18,5 @@ services:
     environment:
       ADMIN_PASSWORD: "${FUSEKI_PWD:-pw123}"
     volumes:
-      - ./fuseki-base:/fuseki/base
+      - ./fuseki-db:/DB
       - ./config-tdb.ttl:/fuseki/set-up-resources/config-tdb

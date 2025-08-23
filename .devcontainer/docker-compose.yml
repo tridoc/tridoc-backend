@@ -33,7 +33,7 @@ services:
     ports:
       - "8001:3030" # Expose for development access
     volumes:
-      - ../fuseki-base:/fuseki/base
+      - ../fuseki-db:/DB
       - ../config-tdb.ttl:/fuseki/set-up-resources/config-tdb
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:3030/$/ping"]
