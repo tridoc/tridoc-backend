@@ -72,14 +72,14 @@ async function createArchive(
   let cmd: Deno.Command;
   
   if (format === "zip") {
-    // Use zip with file list - need to use xargs to read from file properly
+    // Create flat zip - use -j flag to junk (ignore) paths, storing files flat
     cmd = new Deno.Command("bash", {
-      args: ["-c", `cd blobs && cat ${fileList} | xargs zip ${archivePath}`],
+      args: ["-c", `cd blobs && cat ${fileList} | xargs zip -j ${archivePath}`],
     });
   } else {
-    // Use tar with file list
+    // Create flat tar - use --transform to strip directory paths
     cmd = new Deno.Command("bash", {
-      args: ["-c", `tar -C blobs -czf ${archivePath} -T ${fileList}`],
+      args: ["-c", `tar -C blobs -czf ${archivePath} --transform 's|.*/||' -T ${fileList}`],
     });
   }
   
