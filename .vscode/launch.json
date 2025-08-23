@@ -10,8 +10,9 @@
             "runtimeArgs": [
                 "run",
                 "--watch",
+                "--no-prompt",
                 "--allow-net",
-                "--allow-read=blobs,rdf.ttl",
+                "--allow-read=blobs,rdf.ttl,/tmp",
                 "--allow-write=blobs,rdf.ttl,/tmp",
                 "--allow-run",
                 "--allow-env=FUSEKI_PWD,TRIDOC_PWD,OCR_LANG"
