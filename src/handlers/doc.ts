@@ -305,10 +305,10 @@ export async function postPDF(
   if (text.length < 4) {
     // run OCR
     const lang = Deno.env.get("OCR_LANG") || "fra+deu+eng";
-  const cmd = new Deno.Command("pdfsandwich", { args: ["-rgb", "-lang", lang, blobPath] });
-  const p = cmd.spawn();
-  const status = await p.status;
-  if (!status.success) throw new Error("pdfsandwich failed with code " + status.code);
+    const cmd = new Deno.Command("pdfsandwich", { args: ["-rgb", "-lang", lang, blobPath] });
+    const p = cmd.spawn();
+    const status = await p.status;
+    if (!status.success) throw new Error("pdfsandwich failed with code " + status.code);
     // pdfsandwich generates a file with the same name + _ocr
     await Deno.rename(blobPath + "_ocr", blobPath);
     text = await getText(blobPath);
