@@ -9,6 +9,8 @@ interface MigrationStatus {
   skipped: number;
   errors: string[];
   duplicatesFound: number;
+  filesRemoved: number;
+  directoriesRemoved: number;
 }
 
 /**
@@ -24,8 +26,12 @@ export async function migrateBlobs(
     migrated: 0,
     skipped: 0,
     errors: [],
-    duplicatesFound: 0
+    duplicatesFound: 0,
+    filesRemoved: 0,
+    directoriesRemoved: 0
   };
+
+  const successfullyMigrated: Array<{ identifier: string; legacyPath: string }> = [];
 
   try {
     // Get all legacy blob files (filesystem-driven approach)
@@ -91,6 +97,9 @@ export async function migrateBlobs(
         // Update metadata to include blob reference (if document exists in metadata)
         await addBlobReferenceToDocument(identifier, blobHash);
         
+        // Track successful migration for cleanup
+        successfullyMigrated.push({ identifier, legacyPath });
+        
         status.migrated++;
         console.log(`Migrated document ${identifier} -> blob ${blobHash}`);
         
@@ -101,8 +110,12 @@ export async function migrateBlobs(
       }
     }
 
+    // Clean up obsolete files after successful migration
+    await cleanupObsoleteFiles(successfullyMigrated, status);
+
     console.log(`Migration completed: ${status.migrated}/${status.processed} files migrated`);
     console.log(`Found ${status.duplicatesFound} duplicate files (content deduplication)`);
+    console.log(`Removed ${status.filesRemoved} obsolete files and ${status.directoriesRemoved} empty directories`);
     
     return respond(JSON.stringify(status), {
       headers: {
@@ -134,18 +147,20 @@ async function getLegacyBlobFiles(): Promise<Array<{ identifier: string; legacyP
       for await (const entry of Deno.readDir(dir)) {
         const path = `${dir}/${entry.name}`;
         
-        // Skip the new ipfs and thumbs directories
+        // Skip the new ipfs and thumbs directories at the top level
         if (depth === 0 && (entry.name === "ipfs" || entry.name === "thumbs")) {
           continue;
         }
         
-        if (entry.isDirectory && depth < 3) {
-          // Continue walking directory structure (blobs/xx/xxxx/xxxxxxxx/)
+        if (entry.isDirectory) {
+          // Recurse into any subdirectory (no fixed depth limit)
           await walkLegacyBlobs(path, depth + 1);
-        } else if (entry.isFile && depth === 3 && !entry.name.endsWith('.png')) {
-          // This is a legacy blob file (not a thumbnail)
-          const identifier = entry.name;
-          results.push({ identifier, legacyPath: path });
+        } else if (entry.isFile) {
+          // Treat any file (except thumbnails) as a legacy blob leaf
+          if (!entry.name.endsWith('.png')) {
+            const identifier = entry.name;
+            results.push({ identifier, legacyPath: path });
+          }
         }
       }
     } catch (error) {
@@ -186,4 +201,87 @@ INSERT DATA {
   }
 }`;
   return await fusekiUpdate(query);
+}
+
+/**
+ * Clean up obsolete legacy blob files and thumbnails after successful migration
+ */
+async function cleanupObsoleteFiles(
+  migratedFiles: Array<{ identifier: string; legacyPath: string }>,
+  status: MigrationStatus
+) {
+  const directoriesToCheck = new Set<string>();
+
+  for (const { legacyPath } of migratedFiles) {
+    try {
+      // Remove the legacy blob file
+      await Deno.remove(legacyPath);
+      status.filesRemoved++;
+      console.log(`Removed obsolete blob: ${legacyPath}`);
+
+      // Remove the legacy thumbnail if it exists
+      const legacyThumbPath = legacyPath + ".png";
+      try {
+        await Deno.stat(legacyThumbPath);
+        await Deno.remove(legacyThumbPath);
+        status.filesRemoved++;
+        console.log(`Removed obsolete thumbnail: ${legacyThumbPath}`);
+      } catch (error) {
+        if (!(error instanceof Deno.errors.NotFound)) {
+          throw error;
+        }
+        // Thumbnail doesn't exist, that's fine
+      }
+
+      // Track directory for potential cleanup
+      const dir = legacyPath.substring(0, legacyPath.lastIndexOf('/'));
+      directoriesToCheck.add(dir);
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`Failed to remove obsolete file ${legacyPath}: ${errorMessage}`);
+      // Don't add to status.errors since this is cleanup, not core migration
+    }
+  }
+
+  // Clean up empty directories
+  await cleanupEmptyDirectories(directoriesToCheck, status);
+}
+
+/**
+ * Remove empty directories from the legacy blob structure
+ */
+async function cleanupEmptyDirectories(
+  directoriesToCheck: Set<string>,
+  status: MigrationStatus
+) {
+  // Sort directories by depth (deepest first) to ensure proper cleanup order
+  const sortedDirs = Array.from(directoriesToCheck).sort((a, b) => b.split('/').length - a.split('/').length);
+
+  for (const dir of sortedDirs) {
+    try {
+      // Check if directory is empty
+      const entries = [];
+      for await (const entry of Deno.readDir(dir)) {
+        entries.push(entry);
+        break; // We only need to know if there's at least one entry
+      }
+
+      if (entries.length === 0) {
+        await Deno.remove(dir);
+        status.directoriesRemoved++;
+        console.log(`Removed empty directory: ${dir}`);
+
+        // Check parent directory too
+        const parentDir = dir.substring(0, dir.lastIndexOf('/'));
+        if (parentDir && parentDir !== './blobs' && !directoriesToCheck.has(parentDir)) {
+          directoriesToCheck.add(parentDir);
+        }
+      }
+    } catch (error) {
+      if (!(error instanceof Deno.errors.NotFound)) {
+        console.error(`Failed to check/remove directory ${dir}:`, error);
+      }
+    }
+  }
 }
