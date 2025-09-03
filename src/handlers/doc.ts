@@ -268,15 +268,12 @@ export async function postPDF(
   request: Request,
   _match: URLPatternResult,
 ): Promise<Response> {
-  const id = nanoid(); // Document ID (separate from blob hash)
-  
-  // Read the content into memory to compute hash and store blob
+  // Read request body into memory (unchanged approach)
   const chunks: Uint8Array[] = [];
   const reader = request.body?.getReader();
   if (!reader) {
     return respond("Missing request body", { status: 400 });
   }
-  
   try {
     while (true) {
       const { done, value } = await reader.read();
@@ -286,8 +283,6 @@ export async function postPDF(
   } finally {
     reader.releaseLock();
   }
-  
-  // Combine chunks into a single Uint8Array
   const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
   const content = new Uint8Array(totalLength);
   let offset = 0;
@@ -295,49 +290,132 @@ export async function postPDF(
     content.set(chunk, offset);
     offset += chunk.length;
   }
-  
-  // Store blob using content hash
-  const blobHash = await storeBlob(content);
-  const blobPath = getBlobPath(blobHash);
-  
-  console.log((new Date()).toISOString(), "Document created with id", id, "blob hash", blobHash);
-  let text = await getText(blobPath);
-  if (text.length < 4) {
-    // run OCR
-    const lang = Deno.env.get("OCR_LANG") || "fra+deu+eng";
-    const cmd = new Deno.Command("pdfsandwich", { args: ["-rgb", "-lang", lang, blobPath] });
-    const p = cmd.spawn();
-    const status = await p.status;
-    if (!status.success) throw new Error("pdfsandwich failed with code " + status.code);
-    // pdfsandwich generates a file with the same name + _ocr
-    await Deno.rename(blobPath + "_ocr", blobPath);
-    text = await getText(blobPath);
-    console.log((new Date()).toISOString(), id, ": OCR finished");
-  }
-  // no await as we don’t care for the result - if it fails, the thumbnail will be created upon request.
-  // Fire-and-forget thumbnail generation (non-blocking)
+
+  // Put upload into its own temp directory so pdfsandwich writes are predictable
+  const tmpDir = await Deno.makeTempDir({ prefix: "upload_" });
+  const tmpUploadPath = `${tmpDir}/upload.pdf`;
+  await Deno.writeFile(tmpUploadPath, content);
+
   try {
-    const { dir: thumbDir } = hashToThumbnailPath(blobHash);
-    await ensureDir(thumbDir);
-    const thumbPath = getThumbnailPath(blobHash);
-    const cmd = new Deno.Command("convert", {
-      args: ["-thumbnail", "300x", "-alpha", "remove", `${blobPath}[0]`, thumbPath],
-      // Inherit stdio so any ImageMagick errors are visible in server logs
+    const { id, ocrMissing } = await processPDF(tmpUploadPath);
+
+    if (ocrMissing) {
+      return respond("OCR not produced; stored original PDF without embedded text", {
+        headers: {
+          "Location": "/doc/" + id,
+          "Access-Control-Expose-Headers": "Location",
+        },
+      });
+    }
+    return respond(undefined, {
+      headers: {
+        "Location": "/doc/" + id,
+        "Access-Control-Expose-Headers": "Location",
+      },
+    });
+  } finally {
+    try { await Deno.remove(tmpDir, { recursive: true }); } catch (_) { /* ignore cleanup errors */ }
+  }
+}
+
+// Process a PDF file path: if it already contains text => storePDF; otherwise run pdfsandwich
+// and store OCR output if present. Returns the generated id and whether OCR output was missing.
+async function processPDF(pdfPath: string): Promise<{ id: string; ocrMissing: boolean }> {
+  let text = "";
+  try {
+    text = await getText(pdfPath);
+  } catch (_) {
+    text = "";
+  }
+
+  if (text.length >= 4) {
+    const id = await storePDF(pdfPath);
+    return { id, ocrMissing: false };
+  }
+
+  // run pdfsandwich in same directory as pdfPath so output lands predictably
+  const dir = pdfPath.substring(0, Math.max(0, pdfPath.lastIndexOf("/"))) || ".";
+  const base = pdfPath.substring(pdfPath.lastIndexOf("/") + 1).replace(/\.pdf$/i, "");
+  const lang = Deno.env.get("OCR_LANG") || "fra+deu+eng";
+  try {
+    const cmd = new Deno.Command("pdfsandwich", {
+      args: ["-rgb", "-lang", lang, pdfPath],
+      cwd: dir,
       stdout: "inherit",
       stderr: "inherit",
     });
-    cmd.spawn();
-  } catch (_) {
-    // ignore spawn errors for background thumbnail creation
+    const child = cmd.spawn();
+    const status = await child.status;
+    if (!status.success) {
+      console.error("pdfsandwich failed with code", status.code);
+      const id = await storePDF(pdfPath);
+      return { id, ocrMissing: true };
+    }
+
+    // Expect pdfsandwich to write <base>_ocr.pdf next to the input file
+    const ocrCandidate = `${dir}/${base}_ocr.pdf`;
+    try {
+      await Deno.stat(ocrCandidate);
+      const id = await storePDF(ocrCandidate);
+      return { id, ocrMissing: false };
+    } catch (err) {
+      if (err instanceof Deno.errors.NotFound) {
+        console.error("OCR output not found at expected location:", ocrCandidate);
+        const id = await storePDF(pdfPath);
+        return { id, ocrMissing: true };
+      }
+      throw err;
+    }
+  } catch (err) {
+    console.error("pdfsandwich execution failed:", String(err));
+    const id = await storePDF(pdfPath);
+    return { id, ocrMissing: true };
   }
-  const date = datecheck(request);
+}
+
+// storePDF: read pdfPath bytes, extract text (if any), store blob, ensure thumbnail (only if missing),
+// create an ID and persist metadata (id,text,date,blobHash). Returns the generated id.
+async function storePDF(pdfPath: string): Promise<string> {
+  // Extract text (best effort)
+  let text = "";
+  try {
+    text = await getText(pdfPath);
+  } catch (err) {
+    console.warn("getText failed when storing PDF:", String(err));
+    text = "";
+  }
+
+  // Read file bytes and store as blob so hash matches delivered content
+  const finalBytes = await Deno.readFile(pdfPath);
+  const blobHash = await storeBlob(finalBytes);
+
+  // Ensure thumbnail directory and generate thumbnail only if missing
+  try {
+    const { dir: thumbDir, fullPath: thumbPath } = hashToThumbnailPath(blobHash);
+    await ensureDir(thumbDir);
+    let thumbExists = false;
+    try {
+      await Deno.stat(thumbPath);
+      thumbExists = true;
+    } catch (e) {
+      if (!(e instanceof Deno.errors.NotFound)) throw e;
+    }
+    if (!thumbExists) {
+      const cmd = new Deno.Command("convert", {
+        args: ["-thumbnail", "300x", "-alpha", "remove", `${getBlobPath(blobHash)}[0]`, thumbPath],
+        stdout: "inherit",
+        stderr: "inherit",
+      });
+      cmd.spawn();
+    }
+  } catch (err) {
+    console.warn("Thumbnail generation skipped/failed:", String(err));
+  }
+
+  const date = new Date().toISOString();
+  const id = nanoid();
   await metastore.storeDocumentWithBlob({ id, text, date, blobHash });
-  return respond(undefined, {
-    headers: {
-      "Location": "/doc/" + id,
-      "Access-Control-Expose-Headers": "Location",
-    },
-  });
+  return id;
 }
 
 export async function postTag(

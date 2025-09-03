@@ -15,7 +15,7 @@
                 "--allow-read=blobs,rdf.ttl,/tmp",
                 "--allow-write=blobs,rdf.ttl,/tmp",
                 "--allow-run",
-                "--allow-env=FUSEKI_PWD,TRIDOC_PWD,OCR_LANG"
+                "--allow-env=FUSEKI_PWD,TRIDOC_PWD,OCR_LANG, TMPDIR"
             ],
             "attachSimplePort": 9229,
             "env": {
