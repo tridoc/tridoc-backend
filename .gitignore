@@ -6,7 +6,7 @@ yarn-error.log*
 
 node_modules
 blobs
-fuseki-db
+fuseki-data
 .devcontainer/.bash_history
 .bash_history
 .deno-dir

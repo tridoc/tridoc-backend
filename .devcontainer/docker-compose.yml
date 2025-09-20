@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Development environment for tridoc-backend
   tridoc:
@@ -27,14 +25,14 @@ services:
 
   # Fuseki service accessible as 'fuseki' hostname
   fuseki:
-    image: "linkedsolutions/fuseki"
+    image: "linkedsolutions/fuseki-base:5.4.0"
     environment:
       ADMIN_PASSWORD: "${FUSEKI_PWD:-pw123}"
     ports:
       - "8001:3030" # Expose for development access
     volumes:
-      - ../fuseki-db:/DB
-      - ../config-tdb.ttl:/fuseki/set-up-resources/config-tdb
+      - ./fuseki-data:/fuseki/base
+      - ../config-tdb.ttl:/config.ttl
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:3030/$/ping"]
       interval: 5s
