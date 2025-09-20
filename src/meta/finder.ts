@@ -78,14 +78,17 @@ export async function getDocumentList(
     "PREFIX text: <http://jena.apache.org/text#>\n" +
     "SELECT DISTINCT ?s ?identifier ?title ?date\n" +
     "WHERE {\n" +
-    "  ?s s:identifier ?identifier .\n" +
-    "  ?s s:dateCreated ?date .\n" +
+    "  GRAPH <http://3doc/meta> {\n" +
+    "    ?s s:identifier ?identifier .\n" +
+    "    ?s s:dateCreated ?date .\n" +
     tagQuery +
-    "  OPTIONAL { ?s s:name ?title . }\n" +
+    "    OPTIONAL { ?s s:name ?title . }\n" +
     (text
-      ? '{ { ?s text:query (s:name "' + text +
-        '") } UNION { ?s text:query (s:text "' + text + '")} } .\n'
+      ? '    OPTIONAL { ?s s:text ?fulltext . }\n' +
+        '    FILTER (CONTAINS(LCASE(COALESCE(?title, "")), LCASE("' + text + '")) || ' +
+        '            CONTAINS(LCASE(COALESCE(?fulltext, "")), LCASE("' + text + '")))\n'
       : "") +
+    "  }\n" +
     "}\n" +
     "ORDER BY desc(?date)\n" +
     (limit ? "LIMIT " + limit + "\n" : "") +
@@ -162,13 +165,19 @@ PREFIX tridoc:  <http://vocab.tridoc.me/>
 PREFIX text: <http://jena.apache.org/text#>
 SELECT (COUNT(DISTINCT ?s) as ?count)
 WHERE {
-  ?s s:identifier ?identifier .
-  ${tagQuery}
-  ${
-    text
-      ? `{ { ?s text:query (s:name "${text}") } UNION { ?s text:query (s:text "${text}")} } .\n`
-      : ""
-  }}`).then((json) => parseInt(json.results.bindings[0].count.value, 10));
+  GRAPH <http://3doc/meta> {
+    ?s s:identifier ?identifier .
+    ${tagQuery}
+    ${
+      text
+        ? `OPTIONAL { ?s s:name ?title . }
+    OPTIONAL { ?s s:text ?fulltext . }
+    FILTER (CONTAINS(LCASE(COALESCE(?title, "")), LCASE("${text}")) || 
+            CONTAINS(LCASE(COALESCE(?fulltext, "")), LCASE("${text}")))\n`
+        : ""
+    }
+  }
+}`).then((json) => parseInt(json.results.bindings[0].count.value, 10));
 }
 
 export async function getBasicMeta(id: string) {
@@ -178,10 +187,12 @@ PREFIX s: <http://schema.org/>
 PREFIX tridoc: <http://vocab.tridoc.me/>
 SELECT ?title ?date ?blob
 WHERE {
-  ?s s:identifier "${id}" .
-  ?s s:dateCreated ?date .
-  OPTIONAL { ?s s:name ?title . }
-  OPTIONAL { ?s tridoc:blob ?blob . }
+  GRAPH <http://3doc/meta> {
+    ?s s:identifier "${id}" .
+    ?s s:dateCreated ?date .
+    OPTIONAL { ?s s:name ?title . }
+    OPTIONAL { ?s tridoc:blob ?blob . }
+  }
 }`).then((json) => {
     const binding = json.results.bindings[0];
     return {
@@ -197,8 +208,10 @@ export async function getTagList() {
 PREFIX tridoc: <http://vocab.tridoc.me/>
 SELECT DISTINCT ?s ?label ?type
 WHERE {
-  ?s tridoc:label ?label .
-  OPTIONAL { ?s tridoc:valueType ?type . }
+  GRAPH <http://3doc/meta> {
+    ?s tridoc:label ?label .
+    OPTIONAL { ?s tridoc:valueType ?type . }
+  }
 }`;
   return await fusekiFetch(query).then((json) =>
     json.results.bindings.map((binding) => {
@@ -245,9 +258,13 @@ SELECT DISTINCT ?label ?type ?v
 export async function getTagTypes(labels: string[]) {
   const json = await fusekiFetch(`
 PREFIX tridoc: <http://vocab.tridoc.me/>
-SELECT DISTINCT ?l ?t WHERE { VALUES ?l { "${
-    labels.join('" "')
-  }" } ?s tridoc:label ?l . OPTIONAL { ?s tridoc:valueType ?t . } }`);
+SELECT DISTINCT ?l ?t WHERE { 
+  GRAPH <http://3doc/meta> {
+    VALUES ?l { "${labels.join('" "')}" } 
+    ?s tridoc:label ?l . 
+    OPTIONAL { ?s tridoc:valueType ?t . } 
+  }
+}`);
   return json.results.bindings.map(
     (binding) => {
       const result_1 = [];

@@ -13,7 +13,7 @@
                 "--allow-read=blobs,rdf.ttl,/tmp",
                 "--allow-write=blobs,rdf.ttl,/tmp",
                 "--allow-run",
-                "--allow-env=TRIDOC_PWD,OCR_LANG",
+                "--allow-env=TRIDOC_PWD,OCR_LANG,FUSEKI_PWD",
                 "src/main.ts"
             ],
             "group": {

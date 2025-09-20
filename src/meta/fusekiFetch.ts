@@ -10,7 +10,7 @@ type SparqlJson = {
 import { DEFAULT_FUSEKI_PWD } from "../config.ts";
 
 export function dump(accept = "text/turtle") {
-  const query = "CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }";
+  const query = "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH <http://3doc/meta> { ?s ?p ?o } }";
   console.log((new Date()).toISOString(), "→ FUSEKI QUERY", query, "\n");
   return fetch("http://fuseki:3030/3DOC/query", {
     method: "POST",
