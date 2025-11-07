@@ -142,7 +142,7 @@ When getting a comment, a JSON array with objects of the following structure is 
 | `/tag`                     | GET    | Get (list of) all tags               | - | - | 1.1.0 |
 | `/tag/{tagLabel}`          | GET    | Get Documents with this tag. Same as `/doc?tag={tagLabel}` | <sup>[1](#f1)</sup> <sup>[2](#f2)</sup> | Array of objects with document identifiers and titles (where available) |  1.1.0 |
 | `/tag/{tagLabel}`          | DELETE | Delete this tag                      | - | - | 1.1.0 |
-| `/migrate`                 | GET    | Migrate existing nanoid-based blob storage to hash-based storage. Separates documents from blobs in metadata. | - | Migration status JSON with counts and errors | 1.6.0 |
+| `/migrate`                 | POST   | Migrate existing nanoid-based blob storage to hash-based storage. Separates documents from blobs in metadata. | - | Migration status JSON with counts and errors | 1.6.0 |
 | `/version`                 | GET    | Get tridoc version                   | - | semver version number | 1.1.0 |
 
 #### URL-Parameters supported:

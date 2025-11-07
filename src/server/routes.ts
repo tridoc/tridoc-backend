@@ -65,9 +65,6 @@ export const routes: {
   }, {
     pattern: new URLPattern({ pathname: "/version" }),
     handler: version,
-  }, {
-    pattern: new URLPattern({ pathname: "/migrate" }),
-    handler: migrate.migrateBlobs,
   }],
   "POST": [{
     pattern: new URLPattern({ pathname: "/doc" }),
@@ -81,6 +78,9 @@ export const routes: {
   }, {
     pattern: new URLPattern({ pathname: "/tag" }),
     handler: tag.createTag,
+  }, {
+    pattern: new URLPattern({ pathname: "/migrate" }),
+    handler: migrate.migrateBlobs,
   }],
   "PUT": [{
     pattern: new URLPattern({ pathname: "/doc/:id/title" }),
