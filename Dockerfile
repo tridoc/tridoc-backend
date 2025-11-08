@@ -1,11 +1,49 @@
-FROM node:lts-buster
+FROM denoland/deno:2.4.5
+
 EXPOSE 8000
-RUN apt update \
-    && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra
-RUN rm /etc/ImageMagick-6/policy.xml
-RUN mkdir -p /usr/src/app
+
+RUN mkdir -p /usr/src/app/src /usr/src/app/.devcontainer
 WORKDIR /usr/src/app
-COPY . /usr/src/app
-RUN yarn install
-RUN chmod +x /usr/src/app/docker-cmd.sh
-CMD [ "/usr/src/app/docker-cmd.sh" ]
+
+# Install required packages (union of prod + dev wants)
+RUN apt update \
+    && apt -y install pdfsandwich tesseract-ocr-deu tesseract-ocr-fra curl git zip unzip iputils-ping procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# Remove restrictive ImageMagick policy if present (non-fatal if absent)
+RUN rm -f /etc/ImageMagick-6/policy.xml || true
+
+# Adjust ownership for non-root usage
+RUN chown -R deno:deno /usr/src/app \
+    && mkdir -p /home/deno \
+    && chown -R deno:deno /home/deno
+
+USER deno
+
+
+# Local Deno cache + persistent bash history (handy even outside devcontainer)
+ENV DENO_DIR=/usr/src/app/.deno-dir \
+    HISTFILE=/usr/src/app/.devcontainer/.bash_history \
+    HISTSIZE=5000 \
+    HISTFILESIZE=10000
+RUN mkdir -p "$DENO_DIR" src && touch /usr/src/app/.devcontainer/.bash_history && chmod 600 /usr/src/app/.devcontainer/.bash_history
+
+# Configure history persistence only for interactive shells by appending to the deno user's .bashrc
+# This avoids PROMPT_COMMAND being executed in non-interactive shells where 'history' may not accept
+# the supplied arguments and would emit errors.
+RUN mkdir -p /home/deno && \
+    printf '\n# Persist bash history across sessions (interactive shells only)\nif [[ $- == *i* ]]; then\n  # append new history lines and read new lines from history file\n  PROMPT_COMMAND="history -a; history -n; ${PROMPT_COMMAND:-}"\nfi\n' >> /home/deno/.bashrc || true
+
+# Pre-cache dependencies (will speed up builds; safe if later bind-mounted)
+COPY src/deps.ts src/deps.ts
+RUN deno cache src/deps.ts
+
+# Entrypoint: If you add a CMD or ENTRYPOINT for deno run, make sure all required Deno permissions are present (e.g., --allow-write for all needed directories, --allow-read, --allow-net, etc.)
+# Example:
+# CMD ["run", "--allow-net", "--allow-read=blobs,rdf.ttl", "--allow-write=blobs,rdf.ttl,/tmp", "--allow-run", "--allow-env=TRIDOC_PWD,OCR_LANG", "src/main.ts"]
+
+# Copy application source
+COPY . .
+
+# Default container command (can be overridden in dev to `sleep infinity`)
+CMD [ "/bin/bash", "/usr/src/app/docker-cmd.sh" ]

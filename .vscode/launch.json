@@ -1,15 +1,28 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/lib/server",
-            "env": {"TRIDOC_PWD": "tridoc"}
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Tridoc Backend",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/main.ts",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--watch",
+        "--no-prompt",
+        "--allow-net",
+        "--allow-read=blobs,rdf.ttl,/tmp",
+        "--allow-write=blobs,rdf.ttl,/tmp",
+        "--allow-run",
+        "--allow-env=FUSEKI_PWD,TRIDOC_PWD,OCR_LANG, TMPDIR"
+      ],
+      "attachSimplePort": 9229,
+      "env": {
+        "TRIDOC_PWD": "pw123",
+        "OCR_LANG": "deu"
+      },
+      "console": "integratedTerminal"
+    }
+  ]
 }

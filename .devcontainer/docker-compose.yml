@@ -1,0 +1,47 @@
+services:
+  # Development environment for tridoc-backend
+  tridoc:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    user: deno
+    volumes:
+      # Mount the entire workspace for development
+      - ..:/usr/src/app:cached
+      # Mount blobs directory separately if needed
+      - ../blobs:/usr/src/app/blobs
+    ports:
+      - "8000:8000"
+    depends_on:
+      fuseki:
+        condition: service_healthy
+    environment:
+      TRIDOC_PWD: "${TRIDOC_PWD:-pw123}"
+      OCR_LANG: "${OCR_LANG:-deu}"
+    # Keep container running for development
+    command: ["sleep", "infinity"]
+    networks:
+      - tridoc-dev
+
+  # Fuseki service accessible as 'fuseki' hostname
+  fuseki:
+    image: "linkedsolutions/fuseki-base:5.4.0"
+    environment:
+      ADMIN_PASSWORD: "${FUSEKI_PWD:-pw123}"
+    ports:
+      - "8001:3030" # Expose for development access
+    volumes:
+      - ./fuseki-data:/fuseki/base
+      - ../config-tdb.ttl:/config.ttl
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3030/$/ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    networks:
+      - tridoc-dev
+
+networks:
+  tridoc-dev:
+    driver: bridge
