@@ -42,11 +42,16 @@ export async function getTGZ(
   const writableStream = writableStreamFromWriter(rdf);
   await (await dump()).body?.pipeTo(writableStream);
   const cmd = new Deno.Command("bash", {
-    args: ["-c", `tar --transform="s|${rdfPath}|rdf.ttl|" --exclude-tag="${rdfName}" -czvf ${tarPath} blobs/*/`],
+    args: [
+      "-c",
+      `tar --transform="s|${rdfPath}|rdf.ttl|" --exclude-tag="${rdfName}" -czvf ${tarPath} blobs/*/`,
+    ],
   });
   const p = cmd.spawn();
   const status = await p.status;
-  if (!status.success) throw new Error("tar -czf failed with code " + status.code);
+  if (!status.success) {
+    throw new Error("tar -czf failed with code " + status.code);
+  }
   await Deno.remove(rdfPath);
   const tar = await Deno.open(tarPath);
   // Build a readable stream so the file doesn't have to be fully loaded into memory while we send it
@@ -76,12 +81,16 @@ export async function getZIP(
   const writableStream = writableStreamFromWriter(rdf);
   await (await dump()).body?.pipeTo(writableStream);
   // Create zip
-  const cmd1 = new Deno.Command("bash", { args: ["-c", `zip -r ${zipPath} blobs/*/ ${rdfPath} -x "blobs/rdf/*"`] });
+  const cmd1 = new Deno.Command("bash", {
+    args: ["-c", `zip -r ${zipPath} blobs/*/ ${rdfPath} -x "blobs/rdf/*"`],
+  });
   const p_1 = cmd1.spawn();
   const r_1 = await p_1.status;
   if (!r_1.success) throw new Error("zip failed with code " + r_1.code);
   // move rdf-??? to rdf.zip
-  const cmd2 = new Deno.Command("bash", { args: ["-c", `printf "@ ${rdfPath}\n@=rdf.ttl\n" | zipnote -w ${zipPath}`] });
+  const cmd2 = new Deno.Command("bash", {
+    args: ["-c", `printf "@ ${rdfPath}\n@=rdf.ttl\n" | zipnote -w ${zipPath}`],
+  });
   const p_2 = cmd2.spawn();
   const r_2 = await p_2.status;
   if (!r_2.success) throw new Error("zipnote failed with code " + r_2.code);

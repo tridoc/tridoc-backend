@@ -1,5 +1,9 @@
 import { ensureDir } from "../deps.ts";
-import { computeIPFSHash, hashToPath, hashToThumbnailPath } from "./ipfsHash.ts";
+import {
+  computeIPFSHash,
+  hashToPath,
+  hashToThumbnailPath,
+} from "./ipfsHash.ts";
 
 /**
  * Store a blob using content-based IPFS hash as identifier.
@@ -8,10 +12,10 @@ import { computeIPFSHash, hashToPath, hashToThumbnailPath } from "./ipfsHash.ts"
 export async function storeBlob(content: Uint8Array): Promise<string> {
   // Compute content hash
   const hash = await computeIPFSHash(content);
-  
+
   // Get storage path in ipfs subdirectory
   const { dir, fullPath } = hashToPath(hash);
-  
+
   // Check if blob already exists (deduplication)
   try {
     await Deno.stat(fullPath);
@@ -22,11 +26,11 @@ export async function storeBlob(content: Uint8Array): Promise<string> {
       throw error;
     }
   }
-  
+
   // Create directory and store blob
   await ensureDir(dir);
   await Deno.writeFile(fullPath, content);
-  
+
   console.log(`Stored new blob: ${hash}`);
   return hash;
 }
@@ -64,12 +68,15 @@ export function getBlobDir(hash: string): string {
 /**
  * Store thumbnail for a blob
  */
-export async function storeThumbnail(hash: string, thumbnailContent: Uint8Array): Promise<void> {
+export async function storeThumbnail(
+  hash: string,
+  thumbnailContent: Uint8Array,
+): Promise<void> {
   const { dir, fullPath } = hashToThumbnailPath(hash);
-  
+
   await ensureDir(dir);
   await Deno.writeFile(fullPath, thumbnailContent);
-  
+
   console.log(`Stored thumbnail for blob: ${hash}`);
 }
 

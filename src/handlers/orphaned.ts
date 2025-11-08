@@ -21,7 +21,7 @@ async function listAllBlobFiles(): Promise<string[]> {
         // skip the rdf metadata folder
         if (p.endsWith("/rdf")) continue;
         await walk(p);
-      } else if (entry.isFile && !entry.name.endsWith('.png')) {
+      } else if (entry.isFile && !entry.name.endsWith(".png")) {
         // Only include non-thumbnail files
         result.push(p);
       }
@@ -56,21 +56,23 @@ async function getOrphanedFiles(): Promise<string[]> {
     const nameNoExt = stripExtension(basename(p));
     return !referenced.has(nameNoExt);
   });
-  
+
   return orphaned;
 }
 
 async function createArchive(
   orphaned: string[],
-  format: "zip" | "tgz"
+  format: "zip" | "tgz",
 ): Promise<{ path: string; tmpDir: string; fileList: string }> {
   const ts = Date.now();
   const fileList = await writeFileList(orphaned);
   const tmpDir = await Deno.makeTempDir({ prefix: "orphaned-" });
-  const archivePath = `${tmpDir}/orphaned-${format}-${ts}.${format === "zip" ? "zip" : "tar.gz"}`;
-  
+  const archivePath = `${tmpDir}/orphaned-${format}-${ts}.${
+    format === "zip" ? "zip" : "tar.gz"
+  }`;
+
   let cmd: Deno.Command;
-  
+
   if (format === "zip") {
     // Create flat zip - use -j flag to junk (ignore) paths, storing files flat
     cmd = new Deno.Command("bash", {
@@ -79,13 +81,16 @@ async function createArchive(
   } else {
     // Create flat tar - use --transform to strip directory paths
     cmd = new Deno.Command("bash", {
-      args: ["-c", `tar -C blobs -czf ${archivePath} --transform 's|.*/||' -T ${fileList}`],
+      args: [
+        "-c",
+        `tar -C blobs -czf ${archivePath} --transform 's|.*/||' -T ${fileList}`,
+      ],
     });
   }
-  
+
   const p = cmd.spawn();
   const status = await p.status;
-  
+
   if (!status.success) {
     // Clean up on failure
     try {
@@ -96,23 +101,26 @@ async function createArchive(
     }
     throw new Error(`${format} creation failed with code ${status.code}`);
   }
-  
+
   return { path: archivePath, tmpDir, fileList };
 }
 
 async function createArchiveResponse(
-  format: "zip" | "tgz"
+  format: "zip" | "tgz",
 ): Promise<Response> {
   const orphaned = await getOrphanedFiles();
   if (orphaned.length === 0) return respond(undefined, { status: 204 });
 
-  const { path: archivePath, tmpDir, fileList } = await createArchive(orphaned, format);
-  
+  const { path: archivePath, tmpDir, fileList } = await createArchive(
+    orphaned,
+    format,
+  );
+
   // Remove the temporary file list
   await Deno.remove(fileList);
-  
+
   const f = await Deno.open(archivePath, { read: true });
-  
+
   // unlink the archive so it doesn't linger on disk; fd remains readable on POSIX systems
   try {
     await Deno.remove(archivePath);
@@ -121,15 +129,16 @@ async function createArchiveResponse(
   } catch (_e) {
     // ignore cleanup errors
   }
-  
+
   const readableStream = f.readable;
   const ts = Date.now();
   const extension = format === "zip" ? "zip" : "tar.gz";
   const contentType = format === "zip" ? "application/zip" : "application/gzip";
-  
+
   return respond(readableStream, {
     headers: {
-      "content-disposition": `inline; filename="tridoc_orphaned_${ts}.${extension}"`,
+      "content-disposition":
+        `inline; filename="tridoc_orphaned_${ts}.${extension}"`,
       "content-type": contentType,
     },
   });

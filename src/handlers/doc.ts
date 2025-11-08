@@ -2,7 +2,11 @@ import { nanoid } from "../deps.ts";
 import { respond } from "../helpers/cors.ts";
 import { getText } from "../helpers/pdfprocessor.ts";
 import { processParams } from "../helpers/processParams.ts";
-import { storeBlob, getBlobPath, getThumbnailPath } from "../helpers/blobStore.ts";
+import {
+  getBlobPath,
+  getThumbnailPath,
+  storeBlob,
+} from "../helpers/blobStore.ts";
 import * as metadelete from "../meta/delete.ts";
 import * as metafinder from "../meta/finder.ts";
 import * as metastore from "../meta/store.ts";
@@ -28,7 +32,6 @@ function getPath(id: string) {
   return "./blobs/" + id.slice(0, 2) + "/" + id.slice(2, 6) + "/" +
     id.slice(6, 14) + "/" + id;
 }
-
 
 export async function deleteDoc(
   _request: Request,
@@ -77,7 +80,7 @@ export async function getPDF(
 ): Promise<Response> {
   const id = match.pathname.groups.id!;
   const meta = await metafinder.getBasicMeta(id);
-  
+
   // Determine the file path based on whether we have a blob hash or legacy ID
   let path: string;
   if (meta.blob) {
@@ -87,7 +90,7 @@ export async function getPDF(
     // Legacy nanoid-based storage
     path = getPath(id);
   }
-  
+
   try {
     const fileName = meta.title || meta.created || "document";
     const file = await Deno.open(path, { read: true });
@@ -144,7 +147,7 @@ export async function getThumb(
 ): Promise<Response> {
   const id = match.pathname.groups.id!;
   const meta = await metafinder.getBasicMeta(id);
-  
+
   // Determine the file path based on whether we have a blob hash or legacy ID
   let thumbPath: string;
   if (meta.blob) {
@@ -154,47 +157,58 @@ export async function getThumb(
     // Legacy nanoid-based storage
     thumbPath = getPath(id) + ".png";
   }
-  
+
   const fileName = meta.title || meta.created || "thumbnail";
   let thumb: Deno.FsFile;
   try {
     thumb = await Deno.open(thumbPath, { read: true });
   } catch (error) {
     if (error instanceof Deno.errors.NotFound) {
-        try {
-          // Get the blob path for thumbnail generation
-          let blobPath: string;
-          if (meta.blob) {
-            blobPath = getBlobPath(meta.blob);
-            // Ensure the thumbnail directory exists for hash-based storage
-            const { dir: thumbDir } = hashToThumbnailPath(meta.blob);
-            await ensureDir(thumbDir);
-          } else {
-            blobPath = getPath(id);
-            // For legacy storage the directory should already exist with the PDF
-          }
-          
-          await Deno.stat(blobPath); // Check if PDF exists → 404 otherwise
-          const cmd = new Deno.Command("convert", {
-            args: ["-thumbnail", "300x", "-alpha", "remove", `${blobPath}[0]`, thumbPath],
-            stdout: "piped",
-            stderr: "piped",
-          });
-          const { success, code, stdout, stderr } = await cmd.output();
-          if (!success) {
-            const td = new TextDecoder();
-            const err = td.decode(stderr) || td.decode(stdout);
-            console.error("ImageMagick convert error (on-demand):", err.trim());
-            throw new Error("convert failed with code " + code + (err ? ": " + err : ""));
-          }
-          thumb = await Deno.open(thumbPath, { read: true });
-        } catch (error) {
+      try {
+        // Get the blob path for thumbnail generation
+        let blobPath: string;
+        if (meta.blob) {
+          blobPath = getBlobPath(meta.blob);
+          // Ensure the thumbnail directory exists for hash-based storage
+          const { dir: thumbDir } = hashToThumbnailPath(meta.blob);
+          await ensureDir(thumbDir);
+        } else {
+          blobPath = getPath(id);
+          // For legacy storage the directory should already exist with the PDF
+        }
+
+        await Deno.stat(blobPath); // Check if PDF exists → 404 otherwise
+        const cmd = new Deno.Command("convert", {
+          args: [
+            "-thumbnail",
+            "300x",
+            "-alpha",
+            "remove",
+            `${blobPath}[0]`,
+            thumbPath,
+          ],
+          stdout: "piped",
+          stderr: "piped",
+        });
+        const { success, code, stdout, stderr } = await cmd.output();
+        if (!success) {
+          const td = new TextDecoder();
+          const err = td.decode(stderr) || td.decode(stdout);
+          console.error("ImageMagick convert error (on-demand):", err.trim());
+          throw new Error(
+            "convert failed with code " + code + (err ? ": " + err : ""),
+          );
+        }
+        thumb = await Deno.open(thumbPath, { read: true });
+      } catch (error) {
         if (error instanceof Deno.errors.NotFound) {
           return respond("404 Not Found", { status: 404 });
         }
         // Surface ImageMagick error to client for easier debugging
         if (error instanceof Error) {
-          return respond("Thumbnail generation failed: " + error.message, { status: 500 });
+          return respond("Thumbnail generation failed: " + error.message, {
+            status: 500,
+          });
         }
         return respond("Thumbnail generation failed", { status: 500 });
       }
@@ -246,7 +260,9 @@ export async function postComment(
   if (!id) return respond("Missing document id in path", { status: 400 });
   const body = await request.json();
   if (!body || typeof body.text !== "string" || body.text.trim() === "") {
-    return respond("Missing or invalid 'text' in request body", { status: 400 });
+    return respond("Missing or invalid 'text' in request body", {
+      status: 400,
+    });
   }
   const text: string = body.text;
   const created = await metastore.addComment(id, text);
@@ -293,12 +309,15 @@ export async function postPDF(
     const { id, ocrMissing } = await processPDF(tmpUploadPath);
 
     if (ocrMissing) {
-      return respond("OCR not produced; stored original PDF without embedded text", {
-        headers: {
-          "Location": "/doc/" + id,
-          "Access-Control-Expose-Headers": "Location",
+      return respond(
+        "OCR not produced; stored original PDF without embedded text",
+        {
+          headers: {
+            "Location": "/doc/" + id,
+            "Access-Control-Expose-Headers": "Location",
+          },
         },
-      });
+      );
     }
     return respond(undefined, {
       headers: {
@@ -307,13 +326,17 @@ export async function postPDF(
       },
     });
   } finally {
-    try { await Deno.remove(tmpDir, { recursive: true }); } catch (_) { /* ignore cleanup errors */ }
+    try {
+      await Deno.remove(tmpDir, { recursive: true });
+    } catch (_) { /* ignore cleanup errors */ }
   }
 }
 
 // Process a PDF file path: if it already contains text => storePDF; otherwise run pdfsandwich
 // and store OCR output if present. Returns the generated id and whether OCR output was missing.
-async function processPDF(pdfPath: string): Promise<{ id: string; ocrMissing: boolean }> {
+async function processPDF(
+  pdfPath: string,
+): Promise<{ id: string; ocrMissing: boolean }> {
   let text = "";
   try {
     text = await getText(pdfPath);
@@ -327,8 +350,12 @@ async function processPDF(pdfPath: string): Promise<{ id: string; ocrMissing: bo
   }
 
   // run pdfsandwich in same directory as pdfPath so output lands predictably
-  const dir = pdfPath.substring(0, Math.max(0, pdfPath.lastIndexOf("/"))) || ".";
-  const base = pdfPath.substring(pdfPath.lastIndexOf("/") + 1).replace(/\.pdf$/i, "");
+  const dir = pdfPath.substring(0, Math.max(0, pdfPath.lastIndexOf("/"))) ||
+    ".";
+  const base = pdfPath.substring(pdfPath.lastIndexOf("/") + 1).replace(
+    /\.pdf$/i,
+    "",
+  );
   const lang = Deno.env.get("OCR_LANG") || "fra+deu+eng";
   try {
     const cmd = new Deno.Command("pdfsandwich", {
@@ -353,7 +380,10 @@ async function processPDF(pdfPath: string): Promise<{ id: string; ocrMissing: bo
       return { id, ocrMissing: false };
     } catch (err) {
       if (err instanceof Deno.errors.NotFound) {
-        console.error("OCR output not found at expected location:", ocrCandidate);
+        console.error(
+          "OCR output not found at expected location:",
+          ocrCandidate,
+        );
         const id = await storePDF(pdfPath);
         return { id, ocrMissing: true };
       }
@@ -384,7 +414,9 @@ async function storePDF(pdfPath: string): Promise<string> {
 
   // Ensure thumbnail directory and generate thumbnail only if missing
   try {
-    const { dir: thumbDir, fullPath: thumbPath } = hashToThumbnailPath(blobHash);
+    const { dir: thumbDir, fullPath: thumbPath } = hashToThumbnailPath(
+      blobHash,
+    );
     await ensureDir(thumbDir);
     let thumbExists = false;
     try {
@@ -395,7 +427,14 @@ async function storePDF(pdfPath: string): Promise<string> {
     }
     if (!thumbExists) {
       const cmd = new Deno.Command("convert", {
-        args: ["-thumbnail", "300x", "-alpha", "remove", `${getBlobPath(blobHash)}[0]`, thumbPath],
+        args: [
+          "-thumbnail",
+          "300x",
+          "-alpha",
+          "remove",
+          `${getBlobPath(blobHash)}[0]`,
+          thumbPath,
+        ],
         stdout: "inherit",
         stderr: "inherit",
       });
@@ -452,7 +491,9 @@ export async function putTitle(
   if (!id) return respond("Missing document id in path", { status: 400 });
   const body = await request.json();
   if (!body || typeof body.title !== "string" || body.title.trim() === "") {
-    return respond("Missing or invalid 'title' in request body", { status: 400 });
+    return respond("Missing or invalid 'title' in request body", {
+      status: 400,
+    });
   }
   const title: string = body.title;
   await metastore.addTitle(id, title);

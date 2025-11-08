@@ -42,7 +42,8 @@ const handler = async (request: Request): Promise<Response> => {
   } catch (error) {
     let message;
     if (error instanceof Deno.errors.PermissionDenied) {
-      message = "Got “Permission Denied” trying to access the file on disk.\n\n    Please run ```docker exec -u 0 [name of backend-container] chmod -R a+r ./blobs/ rdf.ttl``` on the host server to fix this and similar issues for the future."
+      message =
+        "Got “Permission Denied” trying to access the file on disk.\n\n    Please run ```docker exec -u 0 [name of backend-container] chmod -R a+r ./blobs/ rdf.ttl``` on the host server to fix this and similar issues for the future.";
     }
     console.log(
       (new Date()).toISOString(),

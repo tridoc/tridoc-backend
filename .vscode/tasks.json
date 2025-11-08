@@ -1,77 +1,77 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "Start Tridoc Backend",
-            "type": "shell",
-            "command": "deno",
-            "args": [
-                "run",
-                "--watch",
-                "--no-prompt",
-                "--allow-net",
-                "--allow-read=blobs,rdf.ttl,/tmp",
-                "--allow-write=blobs,rdf.ttl,/tmp",
-                "--allow-run",
-                "--allow-env=TRIDOC_PWD,OCR_LANG,FUSEKI_PWD",
-                "src/main.ts"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "new"
-            },
-            "problemMatcher": [],
-            "options": {
-                "env": {
-                    "TRIDOC_PWD": "pw123",
-                    "OCR_LANG": "deu"
-                }
-            }
-        },
-        {
-            "label": "Cache Dependencies",
-            "type": "shell",
-            "command": "deno",
-            "args": ["cache", "src/deps.ts"],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            }
-        },
-        {
-            "label": "Format Code",
-            "type": "shell",
-            "command": "deno",
-            "args": ["fmt"],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": false,
-                "panel": "shared"
-            }
-        },
-        {
-            "label": "Lint Code",
-            "type": "shell",
-            "command": "deno",
-            "args": ["lint"],
-            "group": "test",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            }
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Tridoc Backend",
+      "type": "shell",
+      "command": "deno",
+      "args": [
+        "run",
+        "--watch",
+        "--no-prompt",
+        "--allow-net",
+        "--allow-read=blobs,rdf.ttl,/tmp",
+        "--allow-write=blobs,rdf.ttl,/tmp",
+        "--allow-run",
+        "--allow-env=TRIDOC_PWD,OCR_LANG,FUSEKI_PWD",
+        "src/main.ts"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "problemMatcher": [],
+      "options": {
+        "env": {
+          "TRIDOC_PWD": "pw123",
+          "OCR_LANG": "deu"
         }
-    ]
+      }
+    },
+    {
+      "label": "Cache Dependencies",
+      "type": "shell",
+      "command": "deno",
+      "args": ["cache", "src/deps.ts"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Format Code",
+      "type": "shell",
+      "command": "deno",
+      "args": ["fmt"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Lint Code",
+      "type": "shell",
+      "command": "deno",
+      "args": ["lint"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    }
+  ]
 }

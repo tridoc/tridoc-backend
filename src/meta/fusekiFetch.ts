@@ -10,12 +10,13 @@ type SparqlJson = {
 import { DEFAULT_FUSEKI_PWD } from "../config.ts";
 
 export function dump(accept = "text/turtle") {
-  const query = "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH <http://3doc/meta> { ?s ?p ?o } }";
+  const query =
+    "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH <http://3doc/meta> { ?s ?p ?o } }";
   console.log((new Date()).toISOString(), "→ FUSEKI QUERY", query, "\n");
   return fetch("http://fuseki:3030/3DOC/query", {
     method: "POST",
     headers: {
-  "Authorization": getAuthHeader(),
+      "Authorization": getAuthHeader(),
       "Content-Type": "application/sparql-query",
       "Accept": accept,
     },
@@ -28,7 +29,7 @@ export async function fusekiFetch(query: string): Promise<SparqlJson> {
   return await fetch("http://fuseki:3030/3DOC/query", {
     method: "POST",
     headers: {
-  "Authorization": getAuthHeader(),
+      "Authorization": getAuthHeader(),
       "Content-Type": "application/sparql-query",
     },
     body: query,
@@ -61,4 +62,3 @@ export function getAuthHeader() {
   const pwd = Deno.env.get("FUSEKI_PWD") || DEFAULT_FUSEKI_PWD;
   return "Basic " + btoa("admin:" + pwd);
 }
-

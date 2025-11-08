@@ -70,7 +70,9 @@ DELETE {
   GRAPH <http://3doc/meta> { <http://3doc/data/${id}> s:name ?o }
 }
 INSERT {
-  GRAPH <http://3doc/meta> { <http://3doc/data/${id}> s:name "${escapeLiteral(title)}" }
+  GRAPH <http://3doc/meta> { <http://3doc/data/${id}> s:name "${
+    escapeLiteral(title)
+  }" }
 }
 WHERE {
   GRAPH <http://3doc/meta> { OPTIONAL { <http://3doc/data/${id}> s:name ?o } }
@@ -104,7 +106,9 @@ export function setGraph(data: string, contentType = "text/turtle") {
   // Forward all payloads to Fuseki's data endpoint and let Fuseki parse the provided
   // serialization according to the Content-Type. This keeps a single code path
   // and supports every Fuseki-supported RDF serialization uniformly.
-  const url = `http://fuseki:3030/3DOC/data?graph=${encodeURIComponent("http://3doc/meta")}`;
+  const url = `http://fuseki:3030/3DOC/data?graph=${
+    encodeURIComponent("http://3doc/meta")
+  }`;
   return fetch(url, {
     method: "PUT",
     headers: {
@@ -115,7 +119,9 @@ export function setGraph(data: string, contentType = "text/turtle") {
   }).then(async (res) => {
     if (!res.ok) {
       const text = await res.text().catch(() => "(no response body)");
-      throw new Error(`Fuseki Error replacing ${contentType} graph: ${res.status} ${text}`);
+      throw new Error(
+        `Fuseki Error replacing ${contentType} graph: ${res.status} ${text}`,
+      );
     }
   });
 }
@@ -140,7 +146,12 @@ INSERT DATA {
 }
 
 export async function storeDocumentWithBlob(
-  { id, text, date, blobHash }: { id: string; text: string; date?: string; blobHash: string },
+  { id, text, date, blobHash }: {
+    id: string;
+    text: string;
+    date?: string;
+    blobHash: string;
+  },
 ) {
   const created = (date ? new Date(date) : new Date()).toISOString();
   const query = `

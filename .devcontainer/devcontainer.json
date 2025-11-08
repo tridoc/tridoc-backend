@@ -2,54 +2,54 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/docker-existing-docker-compose
 // If you want to run as a non-root user in the container, see .devcontainer/docker-compose.yml.
 {
-	"name": "Tridoc Backend Development",
+  "name": "Tridoc Backend Development",
 
-	// Use the independent dev container docker-compose configuration
-	"dockerComposeFile": "docker-compose.yml",
+  // Use the independent dev container docker-compose configuration
+  "dockerComposeFile": "docker-compose.yml",
 
-	"containerEnv": {
-		"TRIDOC_PWD": "pw123",
-		"OCR_LANG": "deu"
-	},
+  "containerEnv": {
+    "TRIDOC_PWD": "pw123",
+    "OCR_LANG": "deu"
+  },
 
-	// The 'service' property is the name of the service for the container that VS Code should
-	// use. Update this value and .devcontainer/docker-compose.yml to the real service name.
-	"service": "tridoc",
+  // The 'service' property is the name of the service for the container that VS Code should
+  // use. Update this value and .devcontainer/docker-compose.yml to the real service name.
+  "service": "tridoc",
 
-	// The optional 'workspaceFolder' property is the path VS Code should open by default when
-	// connected. This is typically a file mount in .devcontainer/docker-compose.yml
-	"workspaceFolder": "/usr/src/app",
+  // The optional 'workspaceFolder' property is the path VS Code should open by default when
+  // connected. This is typically a file mount in .devcontainer/docker-compose.yml
+  "workspaceFolder": "/usr/src/app",
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [8000, 8001],
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [8000, 8001],
 
-	// Start the fuseki service when the dev container starts
-	"runServices": ["fuseki"],
+  // Start the fuseki service when the dev container starts
+  "runServices": ["fuseki"],
 
-	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
-	"shutdownAction": "stopCompose",
+  // Uncomment the next line if you want to keep your containers running after VS Code shuts down.
+  "shutdownAction": "stopCompose",
 
-	// Post-create command to set up the development environment
-	"postCreateCommand": "bash .devcontainer/setup-dev.sh",
+  // Post-create command to set up the development environment
+  "postCreateCommand": "bash .devcontainer/setup-dev.sh",
 
-	// Connect as the deno user
-	"remoteUser": "deno",
-	
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"denoland.vscode-deno"
-			],
-			"settings": {
-				"deno.enable": true,
-				"deno.lint": true,
-				"terminal.integrated.defaultProfile.linux": "bash",
-				"terminal.integrated.profiles.linux": {
-					"bash": {
-						"path": "/bin/bash"
-					}
-				}
-			}
-		}
-	}
+  // Connect as the deno user
+  "remoteUser": "deno",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "denoland.vscode-deno"
+      ],
+      "settings": {
+        "deno.enable": true,
+        "deno.lint": true,
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/bin/bash"
+          }
+        }
+      }
+    }
+  }
 }

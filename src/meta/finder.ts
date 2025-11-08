@@ -84,9 +84,11 @@ export async function getDocumentList(
     tagQuery +
     "    OPTIONAL { ?s s:name ?title . }\n" +
     (text
-      ? '    OPTIONAL { ?s s:text ?fulltext . }\n' +
-        '    FILTER (CONTAINS(LCASE(COALESCE(?title, "")), LCASE("' + text + '")) || ' +
-        '            CONTAINS(LCASE(COALESCE(?fulltext, "")), LCASE("' + text + '")))\n'
+      ? "    OPTIONAL { ?s s:text ?fulltext . }\n" +
+        '    FILTER (CONTAINS(LCASE(COALESCE(?title, "")), LCASE("' + text +
+        '")) || ' +
+        '            CONTAINS(LCASE(COALESCE(?fulltext, "")), LCASE("' + text +
+        '")))\n'
       : "") +
     "  }\n" +
     "}\n" +
@@ -169,13 +171,13 @@ WHERE {
     ?s s:identifier ?identifier .
     ${tagQuery}
     ${
-      text
-        ? `OPTIONAL { ?s s:name ?title . }
+    text
+      ? `OPTIONAL { ?s s:name ?title . }
     OPTIONAL { ?s s:text ?fulltext . }
     FILTER (CONTAINS(LCASE(COALESCE(?title, "")), LCASE("${text}")) || 
             CONTAINS(LCASE(COALESCE(?fulltext, "")), LCASE("${text}")))\n`
-        : ""
-    }
+      : ""
+  }
   }
 }`).then((json) => parseInt(json.results.bindings[0].count.value, 10));
 }
