@@ -1,6 +1,7 @@
 import { nanoid } from "../deps.ts";
 import { respond } from "../helpers/cors.ts";
 import { getText } from "../helpers/pdfprocessor.ts";
+import { runPdfsandwich } from "../helpers/ocr.ts";
 import { processParams } from "../helpers/processParams.ts";
 import {
   getBlobPath,
@@ -349,51 +350,14 @@ async function processPDF(
     return { id, ocrMissing: false };
   }
 
-  // run pdfsandwich in same directory as pdfPath so output lands predictably
-  const dir = pdfPath.substring(0, Math.max(0, pdfPath.lastIndexOf("/"))) ||
-    ".";
-  const base = pdfPath.substring(pdfPath.lastIndexOf("/") + 1).replace(
-    /\.pdf$/i,
-    "",
-  );
   const lang = Deno.env.get("OCR_LANG") || "fra+deu+eng";
-  try {
-    const cmd = new Deno.Command("pdfsandwich", {
-      args: ["-rgb", "-lang", lang, pdfPath],
-      cwd: dir,
-      stdout: "inherit",
-      stderr: "inherit",
-    });
-    const child = cmd.spawn();
-    const status = await child.status;
-    if (!status.success) {
-      console.error("pdfsandwich failed with code", status.code);
-      const id = await storePDF(pdfPath);
-      return { id, ocrMissing: true };
-    }
-
-    // Expect pdfsandwich to write <base>_ocr.pdf next to the input file
-    const ocrCandidate = `${dir}/${base}_ocr.pdf`;
-    try {
-      await Deno.stat(ocrCandidate);
-      const id = await storePDF(ocrCandidate);
-      return { id, ocrMissing: false };
-    } catch (err) {
-      if (err instanceof Deno.errors.NotFound) {
-        console.error(
-          "OCR output not found at expected location:",
-          ocrCandidate,
-        );
-        const id = await storePDF(pdfPath);
-        return { id, ocrMissing: true };
-      }
-      throw err;
-    }
-  } catch (err) {
-    console.error("pdfsandwich execution failed:", String(err));
-    const id = await storePDF(pdfPath);
-    return { id, ocrMissing: true };
+  const ocrPath = await runPdfsandwich(pdfPath, lang);
+  if (ocrPath) {
+    const id = await storePDF(ocrPath);
+    return { id, ocrMissing: false };
   }
+  const id = await storePDF(pdfPath);
+  return { id, ocrMissing: true };
 }
 
 // storePDF: read pdfPath bytes, extract text (if any), store blob, ensure thumbnail (only if missing),
