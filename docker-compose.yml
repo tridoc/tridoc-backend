@@ -10,6 +10,7 @@ services:
       - ./blobs:/usr/src/app/blobs
     environment:
       TRIDOC_PWD: "${TRIDOC_PWD:-pw123}"
+      OCR_LANG: "${OCR_LANG:-fra+deu+eng}"
   # If you override the command, make sure all required Deno permissions are present (e.g., --allow-write for all needed directories, --allow-read, --allow-net, etc.)
   # Example:
   # command: deno run --allow-net --allow-read=blobs,rdf.ttl --allow-write=blobs,rdf.ttl,/tmp --allow-run --allow-env=TRIDOC_PWD,OCR_LANG src/main.ts
