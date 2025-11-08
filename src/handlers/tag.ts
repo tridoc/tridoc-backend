@@ -51,8 +51,10 @@ export async function deleteTag(
   _request: Request,
   match: URLPatternResult,
 ) {
+  const tagLabel = match.pathname.groups.tagLabel;
+  if (!tagLabel) return respond("Tag label missing", { status: 400 });
   await metadelete.deleteTag(
-    decodeURIComponent(match.pathname.groups.tagLabel),
+    decodeURIComponent(tagLabel),
   );
   return respond(undefined, { status: 204 });
 }
@@ -61,8 +63,10 @@ export async function getDocs(
   request: Request,
   match: URLPatternResult,
 ): Promise<Response> {
+  const tagLabel = match.pathname.groups.tagLabel;
+  if (!tagLabel) return respond("Tag label missing", { status: 400 });
   const params = await processParams(request, {
-    tags: [[match.pathname.groups.tagLabel]],
+    tags: [[tagLabel]],
   });
   const response = await metafinder.getDocumentList(params);
   return respond(JSON.stringify(response), {
