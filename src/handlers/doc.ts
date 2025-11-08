@@ -24,11 +24,9 @@ type TagAdd = {
   }; // only for parameterizable tags
 };
 
-function _getDir(id: string) {
-  return "./blobs/" + id.slice(0, 2) + "/" + id.slice(2, 6) + "/" +
-    id.slice(6, 14);
-}
-
+/**
+ * Used for legacy nanoid-based storage
+ */
 function getPath(id: string) {
   return "./blobs/" + id.slice(0, 2) + "/" + id.slice(2, 6) + "/" +
     id.slice(6, 14) + "/" + id;
