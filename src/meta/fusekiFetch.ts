@@ -7,8 +7,6 @@ type SparqlJson = {
   };
 };
 
-import { DEFAULT_FUSEKI_PWD } from "../config.ts";
-
 export function dump(accept = "text/turtle") {
   const query =
     "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH <http://3doc/meta> { ?s ?p ?o } }";
@@ -59,6 +57,6 @@ export async function fusekiUpdate(query: string): Promise<void> {
 }
 
 export function getAuthHeader() {
-  const pwd = Deno.env.get("FUSEKI_PWD") || DEFAULT_FUSEKI_PWD;
+  const pwd = Deno.env.get("FUSEKI_PWD") || "pw123";
   return "Basic " + btoa("admin:" + pwd);
 }
