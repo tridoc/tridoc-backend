@@ -29,13 +29,6 @@ function getPath(id: string) {
     id.slice(6, 14) + "/" + id;
 }
 
-function datecheck(request: Request) {
-  const url = new URL(request.url);
-  const regex =
-    /^(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-6]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-6]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-6]\d([+-][0-2]\d:[0-5]\d|Z))$/;
-  const date = url.searchParams.get("date");
-  return date ? (regex.test(date) ? date : undefined) : undefined;
-}
 
 export async function deleteDoc(
   _request: Request,
