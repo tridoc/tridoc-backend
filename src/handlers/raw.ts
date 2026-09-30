@@ -6,6 +6,34 @@ import { setGraph } from "../meta/store.ts";
 
 const decoder = new TextDecoder("utf-8");
 
+async function removeIfExists(path: string) {
+  try {
+    await Deno.remove(path);
+  } catch (error) {
+    if (!(error instanceof Deno.errors.NotFound)) throw error;
+  }
+}
+
+/**
+ * Opens a generated archive for streaming and removes it from the file system
+ * right away. The open file handle keeps the data readable until the response
+ * stream is closed, at which point the disk space is released, so the archives
+ * don't pile up in the blobs directory.
+ */
+async function openAndUnlink(
+  path: string,
+): Promise<ReadableStream<Uint8Array>> {
+  const file = await Deno.open(path);
+  try {
+    await Deno.remove(path);
+  } catch (error) {
+    file.close();
+    throw error;
+  }
+  // Stream the file so it doesn't have to be fully loaded into memory
+  return file.readable;
+}
+
 export async function deleteRDFFile(
   _request: Request,
   _match: URLPatternResult,
@@ -39,31 +67,33 @@ export async function getTGZ(
     write: true,
     truncate: true,
   });
-  const writableStream = writableStreamFromWriter(rdf);
-  await (await dump()).body?.pipeTo(writableStream);
-  const cmd = new Deno.Command("bash", {
-    args: [
-      "-c",
-      `tar --transform="s|${rdfPath}|rdf.ttl|" --exclude-tag="${rdfName}" -czvf ${tarPath} blobs/*/`,
-    ],
-  });
-  const p = cmd.spawn();
-  const status = await p.status;
-  if (!status.success) {
-    throw new Error("tar -czf failed with code " + status.code);
+  try {
+    const writableStream = writableStreamFromWriter(rdf);
+    await (await dump()).body?.pipeTo(writableStream);
+    const cmd = new Deno.Command("bash", {
+      args: [
+        "-c",
+        `tar --transform="s|${rdfPath}|rdf.ttl|" --exclude-tag="${rdfName}" -czvf ${tarPath} blobs/*/`,
+      ],
+    });
+    const p = cmd.spawn();
+    const status = await p.status;
+    if (!status.success) {
+      throw new Error("tar -czf failed with code " + status.code);
+    }
+  } catch (error) {
+    await removeIfExists(tarPath);
+    throw error;
+  } finally {
+    await removeIfExists(rdfPath);
   }
-  await Deno.remove(rdfPath);
-  const tar = await Deno.open(tarPath);
-  // Build a readable stream so the file doesn't have to be fully loaded into memory while we send it
-  const readableStream = tar.readable;
-  return respond(readableStream, {
+  return respond(await openAndUnlink(tarPath), {
     headers: {
       "content-disposition":
         `inline; filename="tridoc_backup_${timestamp}.tar.gz"`,
       "content-type": "application/gzip",
     },
   });
-  // TODO: Figure out how to delete these files
 }
 
 export async function getZIP(
@@ -78,34 +108,39 @@ export async function getZIP(
     write: true,
     truncate: true,
   });
-  const writableStream = writableStreamFromWriter(rdf);
-  await (await dump()).body?.pipeTo(writableStream);
-  // Create zip
-  const cmd1 = new Deno.Command("bash", {
-    args: ["-c", `zip -r ${zipPath} blobs/*/ ${rdfPath} -x "blobs/rdf/*"`],
-  });
-  const p_1 = cmd1.spawn();
-  const r_1 = await p_1.status;
-  if (!r_1.success) throw new Error("zip failed with code " + r_1.code);
-  // move rdf-??? to rdf.zip
-  const cmd2 = new Deno.Command("bash", {
-    args: ["-c", `printf "@ ${rdfPath}\n@=rdf.ttl\n" | zipnote -w ${zipPath}`],
-  });
-  const p_2 = cmd2.spawn();
-  const r_2 = await p_2.status;
-  if (!r_2.success) throw new Error("zipnote failed with code " + r_2.code);
-  await Deno.remove(rdfPath);
-  const zip = await Deno.open(zipPath);
-  // Build a readable stream so the file doesn't have to be fully loaded into memory while we send it
-  const readableStream = zip.readable;
-  return respond(readableStream, {
+  try {
+    const writableStream = writableStreamFromWriter(rdf);
+    await (await dump()).body?.pipeTo(writableStream);
+    // Create zip
+    const cmd1 = new Deno.Command("bash", {
+      args: ["-c", `zip -r ${zipPath} blobs/*/ ${rdfPath} -x "blobs/rdf/*"`],
+    });
+    const p_1 = cmd1.spawn();
+    const r_1 = await p_1.status;
+    if (!r_1.success) throw new Error("zip failed with code " + r_1.code);
+    // move rdf-??? to rdf.zip
+    const cmd2 = new Deno.Command("bash", {
+      args: [
+        "-c",
+        `printf "@ ${rdfPath}\n@=rdf.ttl\n" | zipnote -w ${zipPath}`,
+      ],
+    });
+    const p_2 = cmd2.spawn();
+    const r_2 = await p_2.status;
+    if (!r_2.success) throw new Error("zipnote failed with code " + r_2.code);
+  } catch (error) {
+    await removeIfExists(zipPath);
+    throw error;
+  } finally {
+    await removeIfExists(rdfPath);
+  }
+  return respond(await openAndUnlink(zipPath), {
     headers: {
       "content-disposition":
         `inline; filename="tridoc_backup_${timestamp}.zip"`,
       "content-type": "application/zip",
     },
   });
-  // TODO: Figure out how to delete these files
 }
 
 export async function putZIP(
